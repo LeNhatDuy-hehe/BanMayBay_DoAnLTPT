@@ -110,28 +110,34 @@ def start_game():
     # HUD
     hud = Hud(may_bay)
 
-    # Địch
-    so_luong_dich = 10
-    for i in range(so_luong_dich):
-        x = random.randint(20, rong - 20)
-        y = random.randint(-600, -40)
-        speed = random.randint(2, 5)
-        dich = Dich(x, y, speed)
-        tatca_sprites.add(dich)
-        dichs.add(dich)
-
-    # Nền cuộn
+    # Biến kiểm soát sinh địch
+    thoi_gian_sinh_dich = 0
+    delay_sinh_dich = 1000  # 1 giây / lần
+    max_dich = 25  # Tối đa số lượng địch trên màn
     bg_y = 0
     bg_speed = 2
 
     running = True
     while running:
-        dong_ho.tick(FPS)
+        dt = dong_ho.tick(FPS)
+        thoi_gian_sinh_dich += dt
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
 
+        # Sinh địch ngẫu nhiên, chậm rãi
+        if thoi_gian_sinh_dich >= delay_sinh_dich and len(dichs) < max_dich:
+            thoi_gian_sinh_dich = 0
+            x = random.randint(20, rong - 20)
+            y = random.randint(-100, -40)
+            speed = random.randint(2, 6)
+            new_enemy = Dich(x, y, speed)
+            tatca_sprites.add(new_enemy)
+            dichs.add(new_enemy)
+
+        # Cập nhật sprite
         tatca_sprites.update()
         dan_nguoi_choi.update()
 
@@ -146,13 +152,6 @@ def start_game():
         hits = pygame.sprite.groupcollide(dan_nguoi_choi, dichs, True, True)
         for hit in hits:
             hud.cong_diem(10)
-            # Spawn lại enemy mới
-            x = random.randint(20, rong - 20)
-            y = random.randint(-600, -40)
-            speed = random.randint(2, 5)
-            new_enemy = Dich(x, y, speed)
-            tatca_sprites.add(new_enemy)
-            dichs.add(new_enemy)
 
         # Địch va chạm máy bay
         hits = pygame.sprite.spritecollide(may_bay, dichs, True)
@@ -161,14 +160,6 @@ def start_game():
             if may_bay.sung_level > 1:
                 may_bay.sung_level -= 1
                 print(f"Mất 1 tim → súng giảm còn Level {may_bay.sung_level}")
-
-            # Spawn lại enemy mới
-            x = random.randint(20, rong - 20)
-            y = random.randint(-600, -40)
-            speed = random.randint(2, 5)
-            new_enemy = Dich(x, y, speed)
-            tatca_sprites.add(new_enemy)
-            dichs.add(new_enemy)
 
             if may_bay.tim <= 0:
                 if game_over_screen(hud.score):
@@ -182,6 +173,8 @@ def start_game():
         hud.ve(man_hinh)
 
         pygame.display.flip()
+
+
 
 
 while True:
