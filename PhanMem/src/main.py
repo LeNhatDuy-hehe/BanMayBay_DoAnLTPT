@@ -28,11 +28,6 @@ def main_menu():
     pygame.mixer.music.load(menu_music)
     pygame.mixer.music.play(-1)
 
-    # Load ảnh nền menu
-    #bg_path = os.path.join(current_path, "..", "assets", "image", "scrollbackground", "backgroundmenu.jpg")
-    #background_menu = pygame.image.load(bg_path).convert_alpha()
-    #background_menu = pygame.transform.scale(background_menu, (rong, cao))
-
     font = pygame.font.SysFont("Arial", 48, bold=True)
     title_text = font.render("PLANE SHOOTER", True, (255, 215, 0))
     play_text = font.render("NEW GAME", True, (255, 215, 0))
@@ -66,12 +61,6 @@ def game_over_screen(score):
     gameover_music = os.path.join(current_path, "..", "assets", "sound", "endgame", "Endgame.wav")
     pygame.mixer.music.load(gameover_music)
     pygame.mixer.music.play(-1)
-
-    #Load ảnh nền game over
-    #bg_path = os.path.join(current_path, "..", "assets", "image", "endgame", "game_over.png")
-    #gameover_img = pygame.image.load(bg_path).convert_alpha()
-    #gameover_img = pygame.transform.scale(gameover_img, (400, 200))
-    #gameover_rect = gameover_img.get_rect(center=(rong // 2, cao // 2 - 150))
 
     font_big = pygame.font.SysFont("Arial", 64, bold=True)
     font_small = pygame.font.SysFont("Arial", 36)
