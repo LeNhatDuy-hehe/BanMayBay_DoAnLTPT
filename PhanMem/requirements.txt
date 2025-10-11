@@ -1,0 +1,2 @@
+Thư viện cần cài đặt
+pygame
