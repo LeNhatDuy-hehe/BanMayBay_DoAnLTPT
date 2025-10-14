@@ -1,6 +1,6 @@
 import pygame
 from bullet import Bullet
-from settings import PLAYER_SIZE, rong  # lấy luôn rong để giới hạn biên
+from settings import PLAYER_SIZE, rong
 
 class Player(pygame.sprite.Sprite):
     def __init__(self, x, y, speed, dan_group):
@@ -54,3 +54,15 @@ class Player(pygame.sprite.Sprite):
                 bullet2 = Bullet(self.rect.centerx - 15, self.rect.top)
                 bullet3 = Bullet(self.rect.centerx + 15, self.rect.top)
                 self.dan_group.add(bullet1, bullet2, bullet3)
+
+    def an_item(self, item, dichs):
+        """Player ăn item (gọi trong game loop khi va chạm item)."""
+        if item.type == "hp":
+            if self.tim < 3:
+                self.tim += 1
+        elif item.type == "power":
+            if self.sung_level < 3:
+                self.sung_level += 1
+                # Mỗi lần player mạnh hơn, địch cũng mạnh hơn
+                for enemy in dichs:
+                    enemy.speed = min(enemy.speed + 0.5, 10)  # giới hạn speed tối đa

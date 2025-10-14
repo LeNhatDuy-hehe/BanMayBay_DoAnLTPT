@@ -9,5 +9,5 @@ class Hud:
         self.score += diem
 
     def ve(self, surface):
-        ve_text(surface, f"Điểm: {self.score}", 25, 10, 10)
-        ve_text(surface, f"Tim: {self.player.tim}", 25, 700, 10)
+        ve_text(surface, f"Score: {self.score}", 25, 10, 10)
+        ve_text(surface, f"Heart: {self.player.tim}", 25, 700, 10)
