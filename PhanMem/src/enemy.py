@@ -7,14 +7,13 @@ class Dich(pygame.sprite.Sprite):
     def __init__(self, x, y, speed, level=1):
         super().__init__()
 
-        # Giới hạn level trong khoảng 1–3 (phòng trường hợp vượt quá)
-        self.level = max(1, min(level, 3))
+        # Giới hạn level trong khoảng 1–2 (đã xóa boss 3)
+        self.level = max(1, min(level, 2))
 
         # Chọn ảnh địch tùy theo level
         image_paths = {
             1: "image/boss/boss1.png",
-            2: "image/boss/boss2.png",
-            3: "image/boss/boss3.png"
+            2: "image/boss/boss2.png"
         }
         enemy_img = load_image(image_paths[self.level])
 

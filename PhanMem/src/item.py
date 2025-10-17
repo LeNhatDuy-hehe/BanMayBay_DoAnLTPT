@@ -2,32 +2,35 @@ import pygame
 import random
 import os
 
+
 class Item(pygame.sprite.Sprite):
     def __init__(self, x, y, item_type, screen_height):
         super().__init__()
         self.type = item_type
 
+        # --- Xác định đường dẫn gốc ---
+        BASE_DIR = os.path.dirname(os.path.dirname(__file__))  # => PhanMem/
+        item_folder = os.path.join(BASE_DIR, "assets", "image", "item")
+
         try:
             if self.type == "hp":
-                self.image = pygame.image.load(
-                    os.path.join("assets", "image", "item", "heart.png")
-                ).convert_alpha()
+                path = os.path.join(item_folder, "heart.png")
+                self.image = pygame.image.load(path).convert_alpha()
             elif self.type == "power":
-                self.image = pygame.image.load(
-                    os.path.join("assets", "image", "item", "powerup.png")
-                ).convert_alpha()
+                path = os.path.join(item_folder, "powerup.png")
+                self.image = pygame.image.load(path).convert_alpha()
             else:
                 # fallback: ô vuông đỏ
                 self.image = pygame.Surface((25, 25))
                 self.image.fill((255, 0, 0))
-        except:
+        except Exception as e:
+            print(f"⚠️ Lỗi load ảnh item: {e}")
             # fallback: ô vuông tím nếu không load được ảnh
             self.image = pygame.Surface((25, 25))
             self.image.fill((128, 0, 128))
 
-        # resize ảnh 25x25
+        # --- Resize ảnh item ---
         self.image = pygame.transform.scale(self.image, (25, 25))
-
         self.rect = self.image.get_rect(center=(x, y))
         self.speed = 3
         self.screen_height = screen_height
@@ -39,7 +42,8 @@ class Item(pygame.sprite.Sprite):
 
 
 def drop_item(x, y, screen_height):
-    if random.random() < 0.15:  # 15% rơi item
+    """Tạo item ngẫu nhiên (15% rơi ra)"""
+    if random.random() < 0.15:
         items = ["power", "hp"]
         weights = [0.09, 0.06]  # Power 9%, HP 6%
         item_type = random.choices(items, weights=weights, k=1)[0]

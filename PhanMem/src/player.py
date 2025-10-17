@@ -1,68 +1,120 @@
 import pygame
-from bullet import Bullet
-from settings import PLAYER_SIZE, rong
+import math
+from utils import load_image
+from settings import PLAYER_SIZE, rong, cao
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self, x, y, speed, dan_group):
+    def __init__(self, x, y, toc_do, dan_nhom):
         super().__init__()
-        # Load và scale ảnh player
-        anh = pygame.image.load("assets/image/player/player.png").convert_alpha()
-        self.image = pygame.transform.scale(anh, PLAYER_SIZE)
+        self.image = load_image("image/player/player.png")
+        self.image = pygame.transform.scale(self.image, PLAYER_SIZE)
         self.rect = self.image.get_rect(center=(x, y))
-        
-        # Thuộc tính
-        self.speed = speed
+        self.toc_do = toc_do
+        self.dan_nhom = dan_nhom
+        self.sung_level = 1
         self.tim = 3
-        self.dan_group = dan_group
-
-        # Cooldown bắn
-        self.cooldown = 300  # mili giây giữa 2 lần bắn
+        self.cooldown = 250  # ms
         self.last_shot = pygame.time.get_ticks()
 
-        # Level súng
-        self.sung_level = 1   # bắt đầu 1 tia
+        # 🌟 Hiệu ứng súng siêu cấp
+        self.aura_angle = 0
+        self.aura_radius = 45
+        self.aura_color = (255, 215, 0)
+        self.aura_alpha = 100
 
     def update(self):
         keys = pygame.key.get_pressed()
-        # Di chuyển trái/phải
         if keys[pygame.K_LEFT] and self.rect.left > 0:
-            self.rect.x -= self.speed
+            self.rect.x -= self.toc_do
         if keys[pygame.K_RIGHT] and self.rect.right < rong:
-            self.rect.x += self.speed
-
-        # Bắn đạn (Space)
+            self.rect.x += self.toc_do
+        if keys[pygame.K_UP] and self.rect.top > 0:
+            self.rect.y -= self.toc_do
+        if keys[pygame.K_DOWN] and self.rect.bottom < cao:
+            self.rect.y += self.toc_do
         if keys[pygame.K_SPACE]:
-            self.ban()
+            self.ban_dan()
 
-    def ban(self):
+        # Xoay hiệu ứng quanh player nếu đang ở Level 5
+        if self.sung_level == 5:
+            self.aura_angle += 6
+            if self.aura_angle >= 360:
+                self.aura_angle = 0
+
+    def ban_dan(self):
         now = pygame.time.get_ticks()
         if now - self.last_shot > self.cooldown:
             self.last_shot = now
 
-            # Bắn theo cấp độ súng
+            x, y = self.rect.centerx, self.rect.top
+                # C1: Đạn thẳng
             if self.sung_level == 1:
-                bullet = Bullet(self.rect.centerx, self.rect.top)
-                self.dan_group.add(bullet)
-
+                self.dan_nhom.add(Dan(x, y, 0))
+                # C2: Đạn đôi
             elif self.sung_level == 2:
-                bullet1 = Bullet(self.rect.centerx - 10, self.rect.top)
-                bullet2 = Bullet(self.rect.centerx + 10, self.rect.top)
-                self.dan_group.add(bullet1, bullet2)
+                self.dan_nhom.add(Dan(x - 15, y, 0))
+                self.dan_nhom.add(Dan(x + 15, y, 0))
+             # C3: Đạn ba — tỏa cực nhẹ và cân đều
+            elif self.sung_level == 3:
+                self.dan_nhom.add(Dan(x, y, 0))           # giữa
+                self.dan_nhom.add(Dan(x - 12, y, -1))     # trái nhẹ
+                self.dan_nhom.add(Dan(x + 12, y, 1))      # phải nhẹ
 
-            elif self.sung_level >= 3:
-                bullet1 = Bullet(self.rect.centerx, self.rect.top)
-                bullet2 = Bullet(self.rect.centerx - 15, self.rect.top)
-                bullet3 = Bullet(self.rect.centerx + 15, self.rect.top)
-                self.dan_group.add(bullet1, bullet2, bullet3)
+            # C4: Hai đạn giữa thẳng + hai đạn ngoài tỏa cực nhẹ và đối xứng
+            elif self.sung_level == 4:
+            # Hai viên giữa
+                self.dan_nhom.add(Dan(x - 8, y, 0))
+                self.dan_nhom.add(Dan(x + 8, y, 0))
 
-    def an_item(self, item, dichs):
-        """Player ăn item (gọi trong game loop khi va chạm item)."""
-        if item.type == "hp":
-            if self.tim < 3:
-                self.tim += 1
-        elif item.type == "power":
-            if self.sung_level < 3:
-                self.sung_level += 1
-                # Mỗi lần player mạnh hơn, địch cũng mạnh hơn
-                for enemy in dichs:
-                    enemy.speed = min(enemy.speed + 0.5, 10)  # giới hạn speed tối đa
+            # Hai viên ngoài, cân tuyệt đối
+                self.dan_nhom.add(Dan(x - 20, y, -1))
+                self.dan_nhom.add(Dan(x + 20, y, 1))
+
+
+            elif self.sung_level == 5:
+                # Đạn xoắn ốc (cực đẹp)
+                for angle in range(0, 360, 60):
+                    rad = math.radians(angle + self.aura_angle)
+                    dx = math.cos(rad) * 6
+                    dy = math.sin(rad) * 6 - 10  # bay lên
+                    self.dan_nhom.add(DanXoanOc(x, y, dx, dy))
+
+    def ve_hieu_ung(self, man_hinh):
+        """✨ Hiệu ứng ánh sáng quanh máy bay ở cấp 5"""
+        if self.sung_level == 5:
+            for i in range(6):
+                angle = math.radians(self.aura_angle + i * 60)
+                px = self.rect.centerx + math.cos(angle) * self.aura_radius
+                py = self.rect.centery + math.sin(angle) * self.aura_radius
+                pygame.draw.circle(man_hinh, self.aura_color, (int(px), int(py)), 5)
+    
+class Dan(pygame.sprite.Sprite):
+    def __init__(self, x, y, dx):
+        super().__init__()
+        self.image = pygame.Surface((6, 14))
+        self.image.fill((0, 255, 255))
+        self.rect = self.image.get_rect(center=(x, y))
+        self.speedy = -10
+        self.speedx = dx
+
+    def update(self):
+        self.rect.y += self.speedy
+        self.rect.x += self.speedx
+        if self.rect.bottom < 0:
+            self.kill()
+
+class DanXoanOc(pygame.sprite.Sprite):
+    """Đạn siêu cấp xoắn ốc (cấp 5)"""
+    def __init__(self, x, y, dx, dy):
+        super().__init__()
+        self.image = pygame.Surface((8, 16), pygame.SRCALPHA)
+        pygame.draw.ellipse(self.image, (255, 255, 0), (0, 0, 8, 16))
+        self.rect = self.image.get_rect(center=(x, y))
+        self.dx = dx
+        self.dy = dy
+
+    def update(self):
+        self.rect.x += self.dx
+        self.rect.y += self.dy
+        if self.rect.bottom < 0 or self.rect.right < 0 or self.rect.left > rong:
+            self.kill()
