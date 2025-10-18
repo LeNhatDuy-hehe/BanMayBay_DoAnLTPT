@@ -38,11 +38,11 @@ class Boss(pygame.sprite.Sprite):
         # ======= Cấu hình theo cấp độ =======
         if level == 1:
             boss_img = "boss1.png"
-            hp = 1200
+            hp = 1
             speed = 0.8
         elif level == 2:
             boss_img = "boss2.png"
-            hp = 1000
+            hp = 1
             speed = 1.2
 
         # ======= Tải hình ảnh =======

@@ -88,16 +88,49 @@ else:
     # fallback to a more intense background if boss image not present
     bg_boss = bg_high
 
-# cuối trò chơi background
-bg_endgame_path = os.path.join(assets_path, "endgame.jpg")
+# cuối trò chơi background - thử các ảnh có sẵn
+bg_endgame_path = os.path.join(assets_path, "vutru.jpg")
+# Backup: thử game_over.png trong endgame
+bg_endgame_path2 = os.path.join(os.path.dirname(__file__), "..", "assets", "image", "endgame", "game_over.png")
 if os.path.exists(bg_endgame_path):
     try:
         bg_endgame = pygame.image.load(bg_endgame_path).convert()
         bg_endgame = pygame.transform.scale(bg_endgame, (rong, cao))
-    except Exception:
+        print(f"Loaded endgame image from: {bg_endgame_path}")
+    except Exception as e:
+        print(f"Error loading endgame image: {e}")
+        bg_endgame = None
+elif os.path.exists(bg_endgame_path2):
+    try:
+        bg_endgame = pygame.image.load(bg_endgame_path2).convert()
+        bg_endgame = pygame.transform.scale(bg_endgame, (rong, cao))
+        print(f"Loaded endgame image from: {bg_endgame_path2}")
+    except Exception as e:
+        print(f"Error loading endgame image: {e}")
         bg_endgame = None
 else:
+    print(f"Endgame image not found at: {bg_endgame_path} or {bg_endgame_path2}")
     bg_endgame = None
+
+# Tạo background endgame tự làm nếu không load được ảnh
+if bg_endgame is None:
+    print("Creating custom endgame background...")
+    bg_endgame = pygame.Surface((rong, cao))
+    
+    # Tạo gradient background từ đen đến xanh dương đậm
+    for y in range(cao):
+        color_intensity = int(y / cao * 100)  # 0 -> 100
+        color = (0, 0, color_intensity)  # Gradient xanh dương
+        pygame.draw.line(bg_endgame, color, (0, y), (rong, y))
+    
+    # Thêm một số ngôi sao
+    for _ in range(100):
+        x = random.randint(0, rong)
+        y = random.randint(0, cao)
+        brightness = random.randint(100, 255)
+        pygame.draw.circle(bg_endgame, (brightness, brightness, brightness), (x, y), 1)
+    
+    print("Custom endgame background created successfully")
 
 # ==================== MÀN HÌNH MENU ====================
 def main_menu():
@@ -321,6 +354,104 @@ def game_over_screen(score):
                         char = event.unicode
                         if char.isprintable():
                             input_name += char
+
+# ==================== MÀN HÌNH KẾT THÚC GAME (HAPPY ENDING) ====================
+def happy_ending_screen(score):
+    """Hiển thị màn hình kết thúc với ảnh endgame và dòng chữ Happy Ending"""
+    global bg_endgame
+    
+    # Dừng nhạc hiện tại và phát nhạc kết thúc
+    pygame.mixer.music.stop()
+    endgame_music = os.path.join(os.path.dirname(__file__), "..", "assets", "sound", "endgame", "Endgame.wav")
+    try:
+        pygame.mixer.music.load(endgame_music)
+        pygame.mixer.music.play(-1)
+    except Exception:
+        pass
+    
+    # Font cho text
+    big_font = pygame.font.SysFont("Arial", 72, bold=True)
+    medium_font = pygame.font.SysFont("Arial", 48)
+    small_font = pygame.font.SysFont("Arial", 36)
+    
+    # Tạo text
+    happy_text = big_font.render("HAPPY ENDING", True, (255, 215, 0))
+    congratulations_text = medium_font.render("Congratulations! You defeated all bosses!", True, (255, 255, 255))
+    score_text = small_font.render(f"Final Score: {score}", True, (200, 200, 200))
+    continue_text = small_font.render("Click anywhere to continue...", True, (100, 255, 100))
+    
+    # Vị trí text
+    happy_rect = happy_text.get_rect(center=(rong // 2, cao // 2 - 100))
+    congratulations_rect = congratulations_text.get_rect(center=(rong // 2, cao // 2 - 20))
+    score_rect = score_text.get_rect(center=(rong // 2, cao // 2 + 40))
+    continue_rect = continue_text.get_rect(center=(rong // 2, cao // 2 + 120))
+    
+    # Hiệu ứng fade in
+    fade_alpha = 0
+    fade_speed = 120  # alpha per second
+    text_visible = False
+    show_time = 0
+    
+    clock = pygame.time.Clock()
+    
+    while True:
+        dt = clock.tick(60)
+        show_time += dt
+        
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.MOUSEBUTTONDOWN and text_visible:
+                return  # Trở về menu chính
+            if event.type == pygame.KEYDOWN and text_visible:
+                if event.key == pygame.K_SPACE or event.key == pygame.K_RETURN:
+                    return  # Trở về menu chính
+        
+        # Vẽ background endgame
+        if bg_endgame:
+            man_hinh.blit(bg_endgame, (0, 0))
+        else:
+            # Nếu không có ảnh endgame, vẽ background đen với hiệu ứng
+            man_hinh.fill((0, 0, 0))
+        
+        # Fade in effect
+        if fade_alpha < 255:
+            fade_alpha = min(255, fade_alpha + fade_speed * (dt / 1000.0))
+        else:
+            text_visible = True
+        
+        # Tạo overlay mờ để text dễ đọc hơn
+        if text_visible:
+            overlay = pygame.Surface((rong, cao), pygame.SRCALPHA)
+            overlay.fill((0, 0, 0, 100))
+            man_hinh.blit(overlay, (0, 0))
+        
+        # Hiệu ứng nhấp nháy cho text "HAPPY ENDING"
+        if text_visible:
+            glow_alpha = int(255 * (0.7 + 0.3 * math.sin(show_time * 0.005)))
+            
+            # Vẽ text với hiệu ứng glow
+            happy_surface = happy_text.copy()
+            happy_surface.set_alpha(glow_alpha)
+            man_hinh.blit(happy_surface, happy_rect)
+            
+            # Vẽ các text khác
+            congratulations_surface = congratulations_text.copy()
+            congratulations_surface.set_alpha(fade_alpha)
+            man_hinh.blit(congratulations_surface, congratulations_rect)
+            
+            score_surface = score_text.copy()
+            score_surface.set_alpha(fade_alpha)
+            man_hinh.blit(score_surface, score_rect)
+            
+            # Text continue nhấp nháy
+            if (show_time // 500) % 2 == 0:
+                continue_surface = continue_text.copy()
+                continue_surface.set_alpha(fade_alpha)
+                man_hinh.blit(continue_surface, continue_rect)
+        
+        pygame.display.flip()
 
 # ==================== HÀM HIỂN THỊ THÔNG BÁO BOSS ====================
 def draw_boss_warning(screen, boss_stage, warning_time):
@@ -630,12 +761,8 @@ def start_game():
                 if boss_stage > 2:
                     boss_stage = 2
 
-                # If this was boss level 2, stop boss bullets, show endgame image and end the run
+                # If this was boss level 2, show happy ending screen
                 if _lvl == 2:
-                    try:
-                        endgame_triggered = True
-                    except Exception:
-                        pass
                     try:
                         # remove any remaining boss bullets
                         for b in list(boss_dan):
@@ -643,29 +770,16 @@ def start_game():
                         boss_dan.empty()
                     except Exception:
                         pass
-
-                    # debug: report bg_endgame availability
+                    
+                    print("🎉 HAPPY ENDING! Bạn đã tiêu diệt tất cả boss! 🎉")
+                    
+                    # Hiển thị màn hình Happy Ending
                     try:
-                        bg_present = ('bg_endgame' in globals() and bg_endgame is not None)
-                        print(f"[DEBUG] boss death: level={_lvl}, bg_endgame_present={bg_present}")
-                    except Exception:
-                        print("[DEBUG] boss death: couldn't check bg_endgame")
-
-                    if 'bg_endgame' in globals() and bg_endgame is not None:
-                        endgame_fade_active = True
-                        endgame_alpha = 255
-                        try:
-                            print("[DEBUG] Blitting bg_endgame now")
-                            man_hinh.blit(bg_endgame, (0, 0))
-                            pygame.display.flip()
-                            pygame.time.delay(2000)
-                            print("[DEBUG] bg_endgame blit + flip done")
-                        except Exception as e:
-                            print(f"[DEBUG] Failed to blit bg_endgame: {e}")
-                    else:
-                        print("[DEBUG] bg_endgame not available, skipping blit")
-
-                    # go to game over / highscores flow
+                        happy_ending_screen(hud.score)
+                    except Exception as e:
+                        print(f"Lỗi khi hiển thị happy ending: {e}")
+                    
+                    # Sau khi xem happy ending, vào màn hình game over để lưu điểm
                     try:
                         if game_over_screen(hud.score):
                             return start_game()
