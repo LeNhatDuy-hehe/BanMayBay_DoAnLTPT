@@ -671,15 +671,31 @@ def start_game():
 
             if thoi_gian_sinh_dich >= current_delay and len(dichs) < max_dich:
                 thoi_gian_sinh_dich = 0
-                for _ in range(random.randint(2, 4)):
+                
+                # Tính số địch cần spawn (không vượt max_dich)
+                to_spawn = random.randint(2, 4)
+                to_spawn = min(to_spawn, max_dich - len(dichs))
+                
+                # Điều chỉnh bg_speed một lần (không trong vòng lặp)
+                if hud.score > 1000:
+                    bg_speed = min(bg_speed + 0.1, 5.0)  # cap tối đa 5.0
+                
+                for _ in range(to_spawn):
                     x = random.randint(20, rong - 20)
-                    y = random.randint(-100, -40)
+                    # Tránh spawn quá gần player
+                    if abs(x - may_bay.rect.centerx) < 60:
+                        offset = random.choice([-100, 100])
+                        x = max(20, min(rong - 20, may_bay.rect.centerx + offset))
+                    
+                    y = random.randint(-120, -40)
                     base_speed = random.randint(2, 4)
                     if hud.score > 500:
                         base_speed += 1
                     if hud.score > 1000:
                         base_speed += 1
-                        bg_speed += 0.5
+                    # Cap tốc độ tối đa
+                    base_speed = min(base_speed, 8)
+                    
                     elapsed = (pygame.time.get_ticks() - start_time) // 10000
                     enemy_level = min(1 + elapsed, 2)
                     random_level = random.randint(1, enemy_level)
