@@ -550,6 +550,9 @@ def start_game():
     boss_warning_duration = 3000  # 3 giây báo động
     boss_warning_stage = 0  # Stage của boss sắp xuất hiện
 
+    # ======= Hệ thống tạm dừng =======
+    paused = False
+
     running = True
     while running:
         dt = dong_ho.tick(FPS)
@@ -560,9 +563,50 @@ def start_game():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_p or event.key == pygame.K_ESCAPE:
+                    paused = not paused
+                    if paused:
+                        pygame.mixer.music.pause()
+                    else:
+                        pygame.mixer.music.unpause()
             if event.type == pygame.USEREVENT + 1:
                 may_bay.sung_level = 4
                 pygame.time.set_timer(pygame.USEREVENT + 1, 0)
+
+        # Nếu đang pause, chỉ hiển thị màn hình pause và bỏ qua phần còn lại
+        if paused:
+            # Vẽ game hiện tại
+            man_hinh.blit(bg_current, (0, bg_y))
+            man_hinh.blit(bg_current, (0, bg_y - cao))
+            tatca_sprites.draw(man_hinh)
+            dan_nguoi_choi.draw(man_hinh)
+            boss_dan.draw(man_hinh)
+            items.draw(man_hinh)
+            if boss:
+                boss.ve(man_hinh)
+            may_bay.ve_hieu_ung(man_hinh)
+            hud.ve(man_hinh)
+            
+            # Overlay mờ
+            overlay = pygame.Surface((rong, cao), pygame.SRCALPHA)
+            overlay.fill((0, 0, 0, 150))
+            man_hinh.blit(overlay, (0, 0))
+            
+            # Text PAUSED
+            pause_font = pygame.font.SysFont("Arial", 72, bold=True)
+            pause_text = pause_font.render("PAUSED", True, (255, 255, 0))
+            pause_rect = pause_text.get_rect(center=(rong // 2, cao // 2 - 50))
+            man_hinh.blit(pause_text, pause_rect)
+            
+            # Hướng dẫn
+            instruction_font = pygame.font.SysFont("Arial", 36)
+            instruction_text = instruction_font.render("Press P or ESC to resume", True, (255, 255, 255))
+            instruction_rect = instruction_text.get_rect(center=(rong // 2, cao // 2 + 30))
+            man_hinh.blit(instruction_text, instruction_rect)
+            
+            pygame.display.flip()
+            continue
 
         tatca_sprites.update()
         dan_nguoi_choi.update()
