@@ -1,5 +1,6 @@
 import pygame
 import math
+import os
 from utils import load_image
 from settings import PLAYER_SIZE, rong, cao
 
@@ -21,6 +22,16 @@ class Player(pygame.sprite.Sprite):
         self.aura_radius = 45
         self.aura_color = (255, 215, 0)
         self.aura_alpha = 100
+
+        # 🔊 Load âm thanh bắn súng
+        try:
+            shot_sound_path = os.path.join(os.path.dirname(__file__), "..", "assets", "sound", "Shot", "Laser Shot.wav")
+            self.shot_sound = pygame.mixer.Sound(shot_sound_path)
+            self.shot_sound.set_volume(0.3)  # Điều chỉnh âm lượng để không quá to
+            print("✅ Đã load âm thanh bắn súng thành công!")
+        except Exception as e:
+            self.shot_sound = None
+            print(f"⚠️ Không thể load âm thanh bắn súng: {e}")
 
     def update(self):
         keys = pygame.key.get_pressed()
@@ -45,6 +56,10 @@ class Player(pygame.sprite.Sprite):
         now = pygame.time.get_ticks()
         if now - self.last_shot > self.cooldown:
             self.last_shot = now
+
+            # 🔊 Phát âm thanh bắn súng
+            if self.shot_sound:
+                self.shot_sound.play()
 
             x, y = self.rect.centerx, self.rect.top
                 # C1: Đạn thẳng
