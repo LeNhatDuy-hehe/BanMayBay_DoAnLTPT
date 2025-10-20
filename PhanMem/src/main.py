@@ -596,16 +596,66 @@ def start_game():
             # Text PAUSED
             pause_font = pygame.font.SysFont("Arial", 72, bold=True)
             pause_text = pause_font.render("PAUSED", True, (255, 255, 0))
-            pause_rect = pause_text.get_rect(center=(rong // 2, cao // 2 - 50))
+            pause_rect = pause_text.get_rect(center=(rong // 2, cao // 2 - 100))
             man_hinh.blit(pause_text, pause_rect)
             
             # Hướng dẫn
             instruction_font = pygame.font.SysFont("Arial", 36)
             instruction_text = instruction_font.render("Press P or ESC to resume", True, (255, 255, 255))
-            instruction_rect = instruction_text.get_rect(center=(rong // 2, cao // 2 + 30))
+            instruction_rect = instruction_text.get_rect(center=(rong // 2, cao // 2 - 20))
             man_hinh.blit(instruction_text, instruction_rect)
             
+            # Tạo các nút
+            button_font = pygame.font.SysFont("Arial", 42)
+            resume_text = button_font.render("RESUME", True, (0, 255, 0))
+            home_text = button_font.render("HOME", True, (255, 255, 255))
+            exit_text = button_font.render("EXIT", True, (255, 100, 100))
+            
+            resume_rect = resume_text.get_rect(center=(rong // 2, cao // 2 + 60))
+            home_rect = home_text.get_rect(center=(rong // 2, cao // 2 + 120))
+            exit_rect = exit_text.get_rect(center=(rong // 2, cao // 2 + 180))
+            
+            # Làm nổi bật nút khi hover
+            mouse_pos = pygame.mouse.get_pos()
+            if resume_rect.collidepoint(mouse_pos):
+                resume_text = button_font.render("RESUME", True, (100, 255, 100))
+            if home_rect.collidepoint(mouse_pos):
+                home_text = button_font.render("HOME", True, (255, 255, 0))
+            if exit_rect.collidepoint(mouse_pos):
+                exit_text = button_font.render("EXIT", True, (255, 150, 150))
+            
+            # Vẽ các nút
+            man_hinh.blit(resume_text, resume_rect)
+            man_hinh.blit(home_text, home_rect)
+            man_hinh.blit(exit_text, exit_rect)
+            
             pygame.display.flip()
+            
+            # Xử lý sự kiện trong pause
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_p or event.key == pygame.K_ESCAPE:
+                        paused = False
+                        pygame.mixer.music.unpause()
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if resume_rect.collidepoint(event.pos):
+                        paused = False
+                        pygame.mixer.music.unpause()
+                    elif home_rect.collidepoint(event.pos):
+                        # Về menu chính
+                        pygame.mixer.music.stop()
+                        return
+                    elif exit_rect.collidepoint(event.pos):
+                        # Lưu điểm và thoát
+                        pygame.mixer.music.stop()
+                        if game_over_screen(hud.score):
+                            return start_game()
+                        else:
+                            return
+            
             continue
 
         tatca_sprites.update()
