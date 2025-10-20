@@ -543,10 +543,6 @@ def start_game():
     boss_dang_ra = False
     # track which boss stages have already been spawned to avoid repeats
     used_boss_stages = set()
-    # endgame fade state (for boss final reveal)
-    endgame_fade_active = False
-    endgame_alpha = 0
-    endgame_fade_speed = 120.0  # alpha per second
 
     # ======= Hệ thống báo động boss =======
     boss_warning_active = False
@@ -650,16 +646,6 @@ def start_game():
                 except Exception:
                     pass
                 print(f"🔥 BOSS {boss_warning_stage} XUẤT HIỆN!!! 🔥")
-
-        # If boss exists and is level 2, check for endgame fade trigger (<=25% HP)
-        if boss and getattr(boss, 'level', 0) == 2:
-            try:
-                if boss.hp <= 0.25 * boss.max_hp and not endgame_fade_active:
-                    endgame_fade_active = True
-                    endgame_alpha = 0
-                    print("🔔 Endgame fade started (boss <=25% HP)")
-            except Exception:
-                pass
 
         # ======= Sinh địch =======
         if not boss_dang_ra:
@@ -807,18 +793,6 @@ def start_game():
         may_bay.ve_hieu_ung(man_hinh)
         hud.ve(man_hinh)
         
-        # Vẽ endgame fade (nếu active) - vẽ lên trên cùng
-        if 'bg_endgame' in globals() and bg_endgame is not None and endgame_fade_active:
-            try:
-                # update alpha
-                if endgame_alpha < 255:
-                    endgame_alpha = min(255, endgame_alpha + endgame_fade_speed * (dt / 1000.0))
-                surf = bg_endgame.copy()
-                surf.set_alpha(int(endgame_alpha))
-                man_hinh.blit(surf, (0, 0))
-            except Exception:
-                pass
-
         # Vẽ thông báo báo động boss (nếu có)
         if boss_warning_active:
             warning_elapsed = pygame.time.get_ticks() - boss_warning_start_time
