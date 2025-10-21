@@ -4,17 +4,17 @@ import os
 import sys
 import math
 from highscores import add_score_with_name, load_highscores, clear_highscores
-from settings import rong, cao, DO, FPS
+from settings import SCREEN_WIDTH, SCREEN_HEIGHT, RED, FPS
 from player import Player
-from enemy import Dich
+from enemy import Enemy
 from hud import Hud
 from item import Item, drop_item
 from boss import Boss
 
 pygame.init()
-man_hinh = pygame.display.set_mode((rong, cao))
+screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("PLANE SHOOTER")
-dong_ho = pygame.time.Clock()
+clock = pygame.time.Clock()
 
 # ======== ĐƯỜNG DẪN ẢNH ========
 assets_path = os.path.join(os.path.dirname(__file__), "..", "assets", "image", "scrollbackground")
@@ -22,7 +22,7 @@ assets_path = os.path.join(os.path.dirname(__file__), "..", "assets", "image", "
 bg_default_path = os.path.join(assets_path, "scroll_background.png")
 bg_menu_path = os.path.join(assets_path, "game-ban-may-bay-5.jpg")
 bg_default = pygame.image.load(bg_default_path).convert()
-bg_default = pygame.transform.scale(bg_default, (rong, cao))
+bg_default = pygame.transform.scale(bg_default, (SCREEN_WIDTH, SCREEN_HEIGHT))
 
 # Optional tiered backgrounds (you can add these images into the folder):
 bg_mid_path = os.path.join(assets_path, "scroll_background_mid.png")
@@ -35,13 +35,13 @@ bg_3000_path = os.path.join(assets_path, "3000.jpg")
 
 if os.path.exists(bg_mid_path):
     bg_mid = pygame.image.load(bg_mid_path).convert()
-    bg_mid = pygame.transform.scale(bg_mid, (rong, cao))
+    bg_mid = pygame.transform.scale(bg_mid, (SCREEN_WIDTH, SCREEN_HEIGHT))
 else:
     bg_mid = bg_default
 
 if os.path.exists(bg_high_path):
     bg_high = pygame.image.load(bg_high_path).convert()
-    bg_high = pygame.transform.scale(bg_high, (rong, cao))
+    bg_high = pygame.transform.scale(bg_high, (SCREEN_WIDTH, SCREEN_HEIGHT))
 else:
     bg_high = bg_default
 
@@ -49,7 +49,7 @@ else:
 if os.path.exists(bg_1000_path):
     try:
         bg_1000 = pygame.image.load(bg_1000_path).convert()
-        bg_1000 = pygame.transform.scale(bg_1000, (rong, cao))
+        bg_1000 = pygame.transform.scale(bg_1000, (SCREEN_WIDTH, SCREEN_HEIGHT))
     except Exception:
         bg_1000 = None
 else:
@@ -59,7 +59,7 @@ else:
 if os.path.exists(bg_3000_path):
     try:
         bg_3000 = pygame.image.load(bg_3000_path).convert()
-        bg_3000 = pygame.transform.scale(bg_3000, (rong, cao))
+        bg_3000 = pygame.transform.scale(bg_3000, (SCREEN_WIDTH, SCREEN_HEIGHT))
     except Exception:
         bg_3000 = None
 else:
@@ -67,7 +67,7 @@ else:
 
 if os.path.exists(bg_menu_path):
     bg_menu = pygame.image.load(bg_menu_path).convert()
-    bg_menu = pygame.transform.scale(bg_menu, (rong, cao))
+    bg_menu = pygame.transform.scale(bg_menu, (SCREEN_WIDTH, SCREEN_HEIGHT))
 else:
     bg_menu = bg_default
 
@@ -75,7 +75,7 @@ else:
 bg_over_path = os.path.join(assets_path, "backgroundmenu.jpg")
 if os.path.exists(bg_over_path):
     bg_over = pygame.image.load(bg_over_path).convert()
-    bg_over = pygame.transform.scale(bg_over, (rong, cao))
+    bg_over = pygame.transform.scale(bg_over, (SCREEN_WIDTH, SCREEN_HEIGHT))
 else:
     bg_over = bg_menu
 
@@ -83,7 +83,7 @@ else:
 bg_boss_path = os.path.join(assets_path, "hinh-nen-vu-tru-1.png")
 if os.path.exists(bg_boss_path):
     bg_boss = pygame.image.load(bg_boss_path).convert()
-    bg_boss = pygame.transform.scale(bg_boss, (rong, cao))
+    bg_boss = pygame.transform.scale(bg_boss, (SCREEN_WIDTH, SCREEN_HEIGHT))
 else:
     # fallback to a more intense background if boss image not present
     bg_boss = bg_high
@@ -95,7 +95,7 @@ bg_endgame_path2 = os.path.join(os.path.dirname(__file__), "..", "assets", "imag
 if os.path.exists(bg_endgame_path):
     try:
         bg_endgame = pygame.image.load(bg_endgame_path).convert()
-        bg_endgame = pygame.transform.scale(bg_endgame, (rong, cao))
+        bg_endgame = pygame.transform.scale(bg_endgame, (SCREEN_WIDTH, SCREEN_HEIGHT))
         print(f"Loaded endgame image from: {bg_endgame_path}")
     except Exception as e:
         print(f"Error loading endgame image: {e}")
@@ -103,7 +103,7 @@ if os.path.exists(bg_endgame_path):
 elif os.path.exists(bg_endgame_path2):
     try:
         bg_endgame = pygame.image.load(bg_endgame_path2).convert()
-        bg_endgame = pygame.transform.scale(bg_endgame, (rong, cao))
+        bg_endgame = pygame.transform.scale(bg_endgame, (SCREEN_WIDTH, SCREEN_HEIGHT))
         print(f"Loaded endgame image from: {bg_endgame_path2}")
     except Exception as e:
         print(f"Error loading endgame image: {e}")
@@ -115,18 +115,18 @@ else:
 # Tạo background endgame tự làm nếu không load được ảnh
 if bg_endgame is None:
     print("Creating custom endgame background...")
-    bg_endgame = pygame.Surface((rong, cao))
+    bg_endgame = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
     
     # Tạo gradient background từ đen đến xanh dương đậm
-    for y in range(cao):
-        color_intensity = int(y / cao * 100)  # 0 -> 100
+    for y in range(SCREEN_HEIGHT):
+        color_intensity = int(y / SCREEN_HEIGHT * 100)  # 0 -> 100
         color = (0, 0, color_intensity)  # Gradient xanh dương
-        pygame.draw.line(bg_endgame, color, (0, y), (rong, y))
+        pygame.draw.line(bg_endgame, color, (0, y), (SCREEN_WIDTH, y))
     
     # Thêm một số ngôi sao
     for _ in range(100):
-        x = random.randint(0, rong)
-        y = random.randint(0, cao)
+        x = random.randint(0, SCREEN_WIDTH)
+        y = random.randint(0, SCREEN_HEIGHT)
         brightness = random.randint(100, 255)
         pygame.draw.circle(bg_endgame, (brightness, brightness, brightness), (x, y), 1)
     
@@ -148,10 +148,10 @@ def main_menu():
     hs_text = font.render("HIGHSCORES", True, (255, 215, 0))
     exit_text = font.render("EXIT", True, (255, 215, 0))
 
-    title_rect = title_text.get_rect(center=(rong // 2, cao // 2 - 180))
-    play_rect = play_text.get_rect(center=(rong // 2, cao // 2 - 60))
-    hs_rect = hs_text.get_rect(center=(rong // 2, cao // 2 + 20))
-    exit_rect = exit_text.get_rect(center=(rong // 2, cao // 2 + 100))
+    title_rect = title_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 180))
+    play_rect = play_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 60))
+    hs_rect = hs_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 20))
+    exit_rect = exit_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 100))
 
     while True:
         for event in pygame.event.get():
@@ -176,14 +176,14 @@ def main_menu():
         exit_text = font.render("EXIT", True, (255, 255, 0) if exit_rect.collidepoint(mouse_pos) else (255, 215, 0))
 
         # Vẽ nền menu
-        man_hinh.blit(bg_menu, (0, 0))
-        man_hinh.blit(title_text, title_rect)
+        screen.blit(bg_menu, (0, 0))
+        screen.blit(title_text, title_rect)
         # no record on menu
-        man_hinh.blit(play_text, play_rect)
-        man_hinh.blit(hs_text, hs_rect)
-        man_hinh.blit(exit_text, exit_rect)
+        screen.blit(play_text, play_rect)
+        screen.blit(hs_text, hs_rect)
+        screen.blit(exit_text, exit_rect)
         pygame.display.flip()
-        dong_ho.tick(FPS)
+        clock.tick(FPS)
 
 
 def highscores_screen():
@@ -191,22 +191,22 @@ def highscores_screen():
     title = font.render("HIGHSCORES", True, (255, 215, 0))
     back_text = font.render("BACK", True, (255, 255, 255))
 
-    title_rect = title.get_rect(center=(rong // 2, 80))
-    back_rect = back_text.get_rect(center=(rong // 2 , cao - 60))
+    title_rect = title.get_rect(center=(SCREEN_WIDTH // 2, 80))
+    back_rect = back_text.get_rect(center=(SCREEN_WIDTH // 2 , SCREEN_HEIGHT - 60))
 
     hs_font = pygame.font.SysFont("Arial", 28)
 
     while True:
-        man_hinh.fill((0, 0, 0))
-        man_hinh.blit(title, title_rect)
+        screen.fill((0, 0, 0))
+        screen.blit(title, title_rect)
 
         highs = load_highscores()
         for i, e in enumerate(highs):
             txt = hs_font.render(f"{i+1}. {e.get('name','---')} - {e.get('score',0)}", True, (255, 215, 0))
-            rect = txt.get_rect(center=(rong // 2, 150 + i * 34))
-            man_hinh.blit(txt, rect)
+            rect = txt.get_rect(center=(SCREEN_WIDTH // 2, 150 + i * 34))
+            screen.blit(txt, rect)
 
-        man_hinh.blit(back_text, back_rect)
+        screen.blit(back_text, back_rect)
         pygame.display.flip()
 
         for event in pygame.event.get():
@@ -236,11 +236,11 @@ def game_over_screen(score):
     menu_text = font_small.render("MENU", True, (255, 255, 255))
     exit_text = font_small.render("EXIT", True, (255, 255, 255))
 
-    score_rect = score_text.get_rect(center=(rong // 2, cao // 2 - 180))
-    prompt_rect = prompt_text.get_rect(center=(rong // 2, cao // 2 - 120))
-    retry_rect = retry_text.get_rect(center=(rong // 2, cao // 2 + 110))
-    menu_rect = menu_text.get_rect(center=(rong // 2, cao // 2 + 160))
-    exit_rect = exit_text.get_rect(center=(rong // 2, cao // 2 + 210))
+    score_rect = score_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 180))
+    prompt_rect = prompt_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 120))
+    retry_rect = retry_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 110))
+    menu_rect = menu_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 160))
+    exit_rect = exit_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 210))
 
     input_name = ""
     input_active = True
@@ -259,47 +259,47 @@ def game_over_screen(score):
     while True:
         # draw background (use bg_menu as requested)
         try:
-            man_hinh.blit(bg_over, (0, 0))
+            screen.blit(bg_over, (0, 0))
         except Exception:
-            man_hinh.fill((0, 0, 0))
+            screen.fill((0, 0, 0))
 
         # semi-transparent overlay to improve readability
-        overlay = pygame.Surface((rong, cao), pygame.SRCALPHA)
+        overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
         overlay.fill((0, 0, 0, 160))
-        man_hinh.blit(overlay, (0, 0))
+        screen.blit(overlay, (0, 0))
 
         # show top record (if any) ABOVE the "Your Score" text
         if top_record:
             rec_surf = hs_font.render(f"RECORD: {top_record.get('name','---')} - {top_record.get('score',0)}", True, (255, 215, 0))
             # place it above the score_text
-            rec_rect = rec_surf.get_rect(center=(rong // 2, score_rect.top - 40))
-            man_hinh.blit(rec_surf, rec_rect)
+            rec_rect = rec_surf.get_rect(center=(SCREEN_WIDTH // 2, score_rect.top - 40))
+            screen.blit(rec_surf, rec_rect)
 
-        man_hinh.blit(score_text, score_rect)
-        man_hinh.blit(prompt_text, prompt_rect)
+        screen.blit(score_text, score_rect)
+        screen.blit(prompt_text, prompt_rect)
 
         # draw input box
-        input_box = pygame.Rect(rong // 2 - 150, cao // 2 - 80, 300, 40)
-        pygame.draw.rect(man_hinh, (50, 50, 50), input_box)
-        pygame.draw.rect(man_hinh, (200, 200, 200), input_box, 2)
+        input_box = pygame.Rect(SCREEN_WIDTH // 2 - 150, SCREEN_HEIGHT // 2 - 80, 300, 40)
+        pygame.draw.rect(screen, (50, 50, 50), input_box)
+        pygame.draw.rect(screen, (200, 200, 200), input_box, 2)
         name_surf = hs_font.render(input_name, True, (255, 255, 255))
-        man_hinh.blit(name_surf, (input_box.x + 8, input_box.y + 6))
+        screen.blit(name_surf, (input_box.x + 8, input_box.y + 6))
 
         # (record already drawn above score)
 
         # show buttons
-        man_hinh.blit(retry_text, retry_rect)
-        man_hinh.blit(menu_text, menu_rect)
-        man_hinh.blit(exit_text, exit_rect)
+        screen.blit(retry_text, retry_rect)
+        screen.blit(menu_text, menu_rect)
+        screen.blit(exit_text, exit_rect)
 
         if saved:
             ok_text = hs_font.render("Saved! Press PLAY AGAIN or EXIT.", True, (100, 255, 100))
-            ok_rect = ok_text.get_rect(center=(rong // 2, cao // 2 + 80))
-            man_hinh.blit(ok_text, ok_rect)
+            ok_rect = ok_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 80))
+            screen.blit(ok_text, ok_rect)
             if new_record:
                 nr = hs_font.render("NEW RECORD!", True, (255, 100, 100))
-                nr_rect = nr.get_rect(center=(rong // 2, cao // 2 - 80))
-                man_hinh.blit(nr, nr_rect)
+                nr_rect = nr.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 80))
+                screen.blit(nr, nr_rect)
 
         pygame.display.flip()
 
@@ -376,10 +376,10 @@ def happy_ending_screen(score):
     continue_text = small_font.render("Click anywhere to continue...", True, (100, 255, 100))
     
     # Vị trí text
-    happy_rect = happy_text.get_rect(center=(rong // 2, cao // 2 - 100))
-    congratulations_rect = congratulations_text.get_rect(center=(rong // 2, cao // 2 - 20))
-    score_rect = score_text.get_rect(center=(rong // 2, cao // 2 + 40))
-    continue_rect = continue_text.get_rect(center=(rong // 2, cao // 2 + 120))
+    happy_rect = happy_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 100))
+    congratulations_rect = congratulations_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 20))
+    score_rect = score_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 40))
+    continue_rect = continue_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 120))
     
     # Hiệu ứng fade in
     fade_alpha = 0
@@ -405,10 +405,10 @@ def happy_ending_screen(score):
         
         # Vẽ background endgame
         if bg_endgame:
-            man_hinh.blit(bg_endgame, (0, 0))
+            screen.blit(bg_endgame, (0, 0))
         else:
             # Nếu không có ảnh endgame, vẽ background đen với hiệu ứng
-            man_hinh.fill((0, 0, 0))
+            screen.fill((0, 0, 0))
         
         # Fade in effect
         if fade_alpha < 255:
@@ -418,9 +418,9 @@ def happy_ending_screen(score):
         
         # Tạo overlay mờ để text dễ đọc hơn
         if text_visible:
-            overlay = pygame.Surface((rong, cao), pygame.SRCALPHA)
+            overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
             overlay.fill((0, 0, 0, 100))
-            man_hinh.blit(overlay, (0, 0))
+            screen.blit(overlay, (0, 0))
         
         # Hiệu ứng nhấp nháy cho text "HAPPY ENDING"
         if text_visible:
@@ -429,22 +429,22 @@ def happy_ending_screen(score):
             # Vẽ text với hiệu ứng glow
             happy_surface = happy_text.copy()
             happy_surface.set_alpha(glow_alpha)
-            man_hinh.blit(happy_surface, happy_rect)
+            screen.blit(happy_surface, happy_rect)
             
             # Vẽ các text khác
             congratulations_surface = congratulations_text.copy()
             congratulations_surface.set_alpha(fade_alpha)
-            man_hinh.blit(congratulations_surface, congratulations_rect)
+            screen.blit(congratulations_surface, congratulations_rect)
             
             score_surface = score_text.copy()
             score_surface.set_alpha(fade_alpha)
-            man_hinh.blit(score_surface, score_rect)
+            screen.blit(score_surface, score_rect)
             
             # Text continue nhấp nháy
             if (show_time // 500) % 2 == 0:
                 continue_surface = continue_text.copy()
                 continue_surface.set_alpha(fade_alpha)
-                man_hinh.blit(continue_surface, continue_rect)
+                screen.blit(continue_surface, continue_rect)
         
         pygame.display.flip()
 
@@ -455,10 +455,10 @@ def draw_boss_warning(screen, boss_stage, warning_time):
     alpha = int(255 * (0.5 + 0.5 * math.sin(warning_time * 0.01)))
     
     # Tạo surface cho text với alpha
-    warning_surface = pygame.Surface((rong, cao), pygame.SRCALPHA)
+    warning_surface = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
     
     # Vẽ nền đỏ mờ
-    red_overlay = pygame.Surface((rong, cao), pygame.SRCALPHA)
+    red_overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
     red_overlay.fill((255, 0, 0, 50))
     warning_surface.blit(red_overlay, (0, 0))
     
@@ -471,21 +471,21 @@ def draw_boss_warning(screen, boss_stage, warning_time):
     main_text = "Give Warning Of Danger"
     main_surface = big_font.render(main_text, True, (255, 255, 0))
     main_surface.set_alpha(alpha)
-    main_rect = main_surface.get_rect(center=(rong//2, cao//2 - 80))
+    main_rect = main_surface.get_rect(center=(SCREEN_WIDTH//2, SCREEN_HEIGHT//2 - 80))
     warning_surface.blit(main_surface, main_rect)
     
     # Text boss
     boss_text = f"BOSS {boss_stage}"
     boss_surface = medium_font.render(boss_text, True, (255, 100, 100))
     boss_surface.set_alpha(alpha)
-    boss_rect = boss_surface.get_rect(center=(rong//2, cao//2 - 20))
+    boss_rect = boss_surface.get_rect(center=(SCREEN_WIDTH//2, SCREEN_HEIGHT//2 - 20))
     warning_surface.blit(boss_surface, boss_rect)
     
     # Text hướng dẫn
     instruction_text = "Prepare For Battle"
     instruction_surface = small_font.render(instruction_text, True, (255, 255, 255))
     instruction_surface.set_alpha(alpha)
-    instruction_rect = instruction_surface.get_rect(center=(rong//2, cao//2 + 40))
+    instruction_rect = instruction_surface.get_rect(center=(SCREEN_WIDTH//2, SCREEN_HEIGHT//2 + 40))
     warning_surface.blit(instruction_surface, instruction_rect)
     
     # Đếm ngược
@@ -494,7 +494,7 @@ def draw_boss_warning(screen, boss_stage, warning_time):
         countdown_text = f"{remaining_time + 1}"
         countdown_surface = big_font.render(countdown_text, True, (255, 0, 0))
         countdown_surface.set_alpha(255)
-        countdown_rect = countdown_surface.get_rect(center=(rong//2, cao//2 + 100))
+        countdown_rect = countdown_surface.get_rect(center=(SCREEN_WIDTH//2, SCREEN_HEIGHT//2 + 100))
         warning_surface.blit(countdown_surface, countdown_rect)
     
     screen.blit(warning_surface, (0, 0))
@@ -505,17 +505,17 @@ def start_game():
     pygame.mixer.music.load(music_path)
     pygame.mixer.music.play(-1)
 
-    tatca_sprites = pygame.sprite.Group()
-    dichs = pygame.sprite.Group()
-    dan_nguoi_choi = pygame.sprite.Group()
+    all_sprites = pygame.sprite.Group()
+    enemies = pygame.sprite.Group()
+    player_bullets = pygame.sprite.Group()
     items = pygame.sprite.Group()
-    boss_dan = pygame.sprite.Group()
-    boss_nhom = pygame.sprite.Group()
+    boss_bullets = pygame.sprite.Group()
+    boss_group = pygame.sprite.Group()
 
-    may_bay = Player(rong // 2, cao - 80, 5, dan_nguoi_choi)
-    tatca_sprites.add(may_bay)
+    player = Player(SCREEN_WIDTH // 2, SCREEN_HEIGHT - 80, 5, player_bullets)
+    all_sprites.add(player)
 
-    hud = Hud(may_bay)
+    hud = Hud(player)
 
     # ======= Load âm thanh báo động =======
     try:
@@ -526,9 +526,9 @@ def start_game():
         warning_sound = None
         print("⚠️ Không thể load âm thanh báo động")
 
-    thoi_gian_sinh_dich = 0
-    delay_sinh_dich = 1000
-    max_dich = 30
+    spawn_timer = 0
+    spawn_delay = 1000
+    max_enemies = 30
     bg_y = 0
     bg_speed = 2
     start_time = pygame.time.get_ticks()
@@ -550,8 +550,8 @@ def start_game():
 
     running = True
     while running:
-        dt = dong_ho.tick(FPS)
-        thoi_gian_sinh_dich += dt
+        dt = clock.tick(FPS)
+        spawn_timer += dt
 
         # ======= Sự kiện =======
         for event in pygame.event.get():
@@ -566,39 +566,39 @@ def start_game():
                     else:
                         pygame.mixer.music.unpause()
             if event.type == pygame.USEREVENT + 1:
-                may_bay.sung_level = 4
+                player.gun_level = 4
                 pygame.time.set_timer(pygame.USEREVENT + 1, 0)
 
         # Nếu đang pause, chỉ hiển thị màn hình pause và bỏ qua phần còn lại
         if paused:
             # Vẽ game hiện tại
-            man_hinh.blit(bg_current, (0, bg_y))
-            man_hinh.blit(bg_current, (0, bg_y - cao))
-            tatca_sprites.draw(man_hinh)
-            dan_nguoi_choi.draw(man_hinh)
-            boss_dan.draw(man_hinh)
-            items.draw(man_hinh)
+            screen.blit(bg_current, (0, bg_y))
+            screen.blit(bg_current, (0, bg_y - SCREEN_HEIGHT))
+            all_sprites.draw(screen)
+            player_bullets.draw(screen)
+            boss_bullets.draw(screen)
+            items.draw(screen)
             if boss:
-                boss.ve(man_hinh)
-            may_bay.ve_hieu_ung(man_hinh)
-            hud.ve(man_hinh)
+                boss.draw(screen)
+            player.draw_effect(screen)
+            hud.draw(screen)
             
             # Overlay mờ
-            overlay = pygame.Surface((rong, cao), pygame.SRCALPHA)
+            overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
             overlay.fill((0, 0, 0, 150))
-            man_hinh.blit(overlay, (0, 0))
+            screen.blit(overlay, (0, 0))
             
             # Text PAUSED
             pause_font = pygame.font.SysFont("Arial", 72, bold=True)
             pause_text = pause_font.render("PAUSED", True, (255, 255, 0))
-            pause_rect = pause_text.get_rect(center=(rong // 2, cao // 2 - 100))
-            man_hinh.blit(pause_text, pause_rect)
+            pause_rect = pause_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 100))
+            screen.blit(pause_text, pause_rect)
             
             # Hướng dẫn
             instruction_font = pygame.font.SysFont("Arial", 36)
             instruction_text = instruction_font.render("Press P or ESC to resume", True, (255, 255, 255))
-            instruction_rect = instruction_text.get_rect(center=(rong // 2, cao // 2 - 20))
-            man_hinh.blit(instruction_text, instruction_rect)
+            instruction_rect = instruction_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 20))
+            screen.blit(instruction_text, instruction_rect)
             
             # Tạo các nút
             button_font = pygame.font.SysFont("Arial", 42)
@@ -606,9 +606,9 @@ def start_game():
             home_text = button_font.render("HOME", True, (255, 255, 255))
             exit_text = button_font.render("EXIT", True, (255, 100, 100))
             
-            resume_rect = resume_text.get_rect(center=(rong // 2, cao // 2 + 60))
-            home_rect = home_text.get_rect(center=(rong // 2, cao // 2 + 120))
-            exit_rect = exit_text.get_rect(center=(rong // 2, cao // 2 + 180))
+            resume_rect = resume_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 60))
+            home_rect = home_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 120))
+            exit_rect = exit_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 180))
             
             # Làm nổi bật nút khi hover
             mouse_pos = pygame.mouse.get_pos()
@@ -620,9 +620,9 @@ def start_game():
                 exit_text = button_font.render("EXIT", True, (255, 150, 150))
             
             # Vẽ các nút
-            man_hinh.blit(resume_text, resume_rect)
-            man_hinh.blit(home_text, home_rect)
-            man_hinh.blit(exit_text, exit_rect)
+            screen.blit(resume_text, resume_rect)
+            screen.blit(home_text, home_rect)
+            screen.blit(exit_text, exit_rect)
             
             pygame.display.flip()
             
@@ -653,10 +653,10 @@ def start_game():
             
             continue
 
-        tatca_sprites.update()
-        dan_nguoi_choi.update()
+        all_sprites.update()
+        player_bullets.update()
         items.update()
-        boss_dan.update()
+        boss_bullets.update()
         if boss:
             boss.update()
 
@@ -689,10 +689,10 @@ def start_game():
             else:
                 bg_current = bg_default
 
-        man_hinh.blit(bg_current, (0, bg_y))
-        man_hinh.blit(bg_current, (0, bg_y - cao))
+        screen.blit(bg_current, (0, bg_y))
+        screen.blit(bg_current, (0, bg_y - SCREEN_HEIGHT))
         bg_y += bg_speed
-        if bg_y >= cao:
+        if bg_y >= SCREEN_HEIGHT:
             bg_y = 0
 
         # ======= Hệ thống báo động và sinh Boss =======
@@ -722,11 +722,11 @@ def start_game():
             
             if warning_elapsed >= boss_warning_duration:
                 # Hết thời gian báo động, spawn boss
-                for enemy in dichs:
+                for enemy in enemies:
                     enemy.kill()
-                boss = Boss(rong // 2, 120, 2, bullet_group=boss_dan, level=boss_warning_stage)
-                tatca_sprites.add(boss)
-                boss_nhom.add(boss)
+                boss = Boss(SCREEN_WIDTH // 2, 120, 2, bullet_group=boss_bullets, level=boss_warning_stage)
+                all_sprites.add(boss)
+                boss_group.add(boss)
                 boss_dang_ra = True
                 boss_warning_active = False
                 # mark this stage as used so it won't be spawned again
@@ -738,29 +738,29 @@ def start_game():
 
         # ======= Sinh địch =======
         if not boss_dang_ra:
-            current_delay = delay_sinh_dich
+            current_delay = spawn_delay
             if hud.score > 500:
                 current_delay = 700
             if hud.score > 1000:
                 current_delay = 500
 
-            if thoi_gian_sinh_dich >= current_delay and len(dichs) < max_dich:
-                thoi_gian_sinh_dich = 0
+            if spawn_timer >= current_delay and len(enemies) < max_enemies:
+                spawn_timer = 0
                 
                 # Tính số địch cần spawn (không vượt max_dich)
                 to_spawn = random.randint(2, 4)
-                to_spawn = min(to_spawn, max_dich - len(dichs))
+                to_spawn = min(to_spawn, max_enemies - len(enemies))
                 
                 # Điều chỉnh bg_speed một lần (không trong vòng lặp)
                 if hud.score > 1000:
                     bg_speed = min(bg_speed + 0.1, 5.0)  # cap tối đa 5.0
                 
                 for _ in range(to_spawn):
-                    x = random.randint(20, rong - 20)
+                    x = random.randint(20, SCREEN_WIDTH - 20)
                     # Tránh spawn quá gần player
-                    if abs(x - may_bay.rect.centerx) < 60:
+                    if abs(x - player.rect.centerx) < 60:
                         offset = random.choice([-100, 100])
-                        x = max(20, min(rong - 20, may_bay.rect.centerx + offset))
+                        x = max(20, min(SCREEN_WIDTH - 20, player.rect.centerx + offset))
                     
                     y = random.randint(-120, -40)
                     base_speed = random.randint(2, 4)
@@ -774,49 +774,49 @@ def start_game():
                     elapsed = (pygame.time.get_ticks() - start_time) // 10000
                     enemy_level = min(1 + elapsed, 2)
                     random_level = random.randint(1, enemy_level)
-                    new_enemy = Dich(x, y, base_speed, level=random_level)
-                    tatca_sprites.add(new_enemy)
-                    dichs.add(new_enemy)
+                    new_enemy = Enemy(x, y, base_speed, level=random_level)
+                    all_sprites.add(new_enemy)
+                    enemies.add(new_enemy)
 
         # ======= Va chạm =======
-        hits = pygame.sprite.groupcollide(dan_nguoi_choi, dichs, True, False)
-        for bullet, enemies in hits.items():
-            for enemy in enemies:
-                if enemy.tru_mau(1):
+        hits = pygame.sprite.groupcollide(player_bullets, enemies, True, False)
+        for bullet, enemies_in in hits.items():
+            for enemy in enemies_in:
+                if enemy.take_damage(1):
                     enemy.kill()
-                    hud.cong_diem(10)
-                    item = drop_item(enemy.rect.centerx, enemy.rect.centery, cao)
+                    hud.add_score(10)
+                    item = drop_item(enemy.rect.centerx, enemy.rect.centery, SCREEN_HEIGHT)
                     if item:
-                        tatca_sprites.add(item)
+                        all_sprites.add(item)
                         items.add(item)
 
-        hits = pygame.sprite.spritecollide(may_bay, dichs, True)
+        hits = pygame.sprite.spritecollide(player, enemies, True)
         for hit in hits:
-            may_bay.tim -= 1
-            if may_bay.sung_level > 1:
-                may_bay.sung_level -= 1
-            if may_bay.tim <= 0:
+            player.lives -= 1
+            if player.gun_level > 1:
+                player.gun_level -= 1
+            if player.lives <= 0:
                 if game_over_screen(hud.score):
                     return start_game()
                 else:
                     running = False
 
-        collected = pygame.sprite.spritecollide(may_bay, items, True)
+        collected = pygame.sprite.spritecollide(player, items, True)
         for item in collected:
             if item.type == "hp":
-                may_bay.tim = min(3, may_bay.tim + 1)
+                player.lives = min(3, player.lives + 1)
             elif item.type == "power":
-                if may_bay.sung_level < 4:
-                    may_bay.sung_level += 1
-                elif may_bay.sung_level == 4:
-                    may_bay.sung_level = 5
+                if player.gun_level < 4:
+                    player.gun_level += 1
+                elif player.gun_level == 4:
+                    player.gun_level = 5
                     pygame.time.set_timer(pygame.USEREVENT + 1, 2000)
 
         # ======= Boss =======
         if boss:
-            boss_hits = pygame.sprite.spritecollide(boss, dan_nguoi_choi, True)
+            boss_hits = pygame.sprite.spritecollide(boss, player_bullets, True)
             for _ in boss_hits:
-                boss.tru_mau(5)
+                boss.take_damage(5)
             if boss.hp <= 0:
                 # capture the level before destroying the boss
                 try:
@@ -824,7 +824,7 @@ def start_game():
                 except Exception:
                     _lvl = None
 
-                hud.cong_diem(500 * boss_stage)
+                hud.add_score(500 * boss_stage)
                 boss.stop_boss_music()  # Dừng nhạc boss khi boss chết
                 boss.kill()
                 boss_dang_ra = False
@@ -842,9 +842,9 @@ def start_game():
                     print(f"⚠️ Lỗi khi khôi phục nhạc nền: {e}")
 
                 for _ in range(3):
-                    item = drop_item(rong // 2 + random.randint(-40, 40), 200 + random.randint(-30, 30), cao)
+                    item = drop_item(SCREEN_WIDTH // 2 + random.randint(-40, 40), 200 + random.randint(-30, 30), SCREEN_HEIGHT)
                     if item:
-                        tatca_sprites.add(item)
+                        all_sprites.add(item)
                         items.add(item)
 
                 boss_stage += 1
@@ -856,9 +856,9 @@ def start_game():
                 if _lvl == 2:
                     try:
                         # remove any remaining boss bullets
-                        for b in list(boss_dan):
+                        for b in list(boss_bullets):
                             b.kill()
-                        boss_dan.empty()
+                        boss_bullets.empty()
                     except Exception:
                         pass
                     
@@ -879,29 +879,29 @@ def start_game():
                     except Exception:
                         return
 
-        boss_bullet_hits = pygame.sprite.spritecollide(may_bay, boss_dan, True)
+        boss_bullet_hits = pygame.sprite.spritecollide(player, boss_bullets, True)
         if boss_bullet_hits:
-            may_bay.tim -= 1
-            if may_bay.tim <= 0:
+            player.lives -= 1
+            if player.lives <= 0:
                 if game_over_screen(hud.score):
                     return start_game()
                 else:
                     running = False
 
         # ======= Vẽ =======
-        tatca_sprites.draw(man_hinh)
-        dan_nguoi_choi.draw(man_hinh)
-        boss_dan.draw(man_hinh)
-        items.draw(man_hinh)
+        all_sprites.draw(screen)
+        player_bullets.draw(screen)
+        boss_bullets.draw(screen)
+        items.draw(screen)
         if boss:
-            boss.ve(man_hinh)
-        may_bay.ve_hieu_ung(man_hinh)
-        hud.ve(man_hinh)
+            boss.draw(screen)
+        player.draw_effect(screen)
+        hud.draw(screen)
         
         # Vẽ thông báo báo động boss (nếu có)
         if boss_warning_active:
             warning_elapsed = pygame.time.get_ticks() - boss_warning_start_time
-            draw_boss_warning(man_hinh, boss_warning_stage, warning_elapsed)
+            draw_boss_warning(screen, boss_warning_stage, warning_elapsed)
         
         pygame.display.flip()
 

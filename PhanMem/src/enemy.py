@@ -1,9 +1,9 @@
 import pygame
 import random
 from utils import load_image
-from settings import ENEMY_SIZE, cao, rong  # lấy luôn chiều cao, rộng màn hình
+from settings import ENEMY_SIZE, SCREEN_HEIGHT as cao, SCREEN_WIDTH as rong  # compatibility import
 
-class Dich(pygame.sprite.Sprite):
+class Enemy(pygame.sprite.Sprite):
     def __init__(self, x, y, speed, level=1):
         super().__init__()
 
@@ -37,7 +37,13 @@ class Dich(pygame.sprite.Sprite):
             self.rect.y = -random.randint(40, 120)
             self.rect.x = random.randint(20, rong - 20)
 
-    def tru_mau(self, damage=1):
-        """Trừ máu khi trúng đạn — trả True nếu địch chết"""
+    def take_damage(self, damage=1):
+        """Reduce HP when hit — return True if enemy is dead"""
         self.hp -= damage
         return self.hp <= 0
+
+# --- Backward compatibility aliases ---
+# Class alias
+Dich = Enemy
+# Method alias for existing code that may call enemy.tru_mau(...)
+Enemy.tru_mau = Enemy.take_damage

@@ -215,6 +215,9 @@ class Boss(pygame.sprite.Sprite):
             self.bullet_group.add(bullet)
 
     def tru_mau(self, damage):
+        return self.take_damage(damage)
+
+    def take_damage(self, damage):
         self.hp -= damage
         if self.hp <= 0:
             self.hp = 0
@@ -222,17 +225,23 @@ class Boss(pygame.sprite.Sprite):
         return False
 
     def ve(self, man_hinh):
-        man_hinh.blit(self.image, self.rect)
-        self.ve_hp_bar(man_hinh)
+        return self.draw(man_hinh)
+
+    def draw(self, surface):
+        surface.blit(self.image, self.rect)
+        self.draw_hp_bar(surface)
 
     def ve_hp_bar(self, man_hinh):
+        return self.draw_hp_bar(man_hinh)
+
+    def draw_hp_bar(self, surface):
         bar_width = 400
         bar_height = 20
         fill = int((self.hp / self.max_hp) * bar_width)
         outline_rect = pygame.Rect(200, 10, bar_width, bar_height)
         fill_rect = pygame.Rect(outline_rect.x, outline_rect.y, fill, bar_height)
-        pygame.draw.rect(man_hinh, (255, 0, 0), fill_rect)
-        pygame.draw.rect(man_hinh, (255, 255, 255), outline_rect, 3)
+        pygame.draw.rect(surface, (255, 0, 0), fill_rect)
+        pygame.draw.rect(surface, (255, 255, 255), outline_rect, 3)
 
     def stop_boss_music(self):
         """Dừng nhạc boss khi boss bị tiêu diệt"""

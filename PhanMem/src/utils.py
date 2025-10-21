@@ -9,7 +9,12 @@ def load_image(path):
 def load_sound(path):
     return pygame.mixer.Sound(os.path.join(ASSET_DIR, path))
 
-def ve_text(surface, text, size, x, y, color=(255,255,255)):
+def draw_text(surface, text, size, x, y, color=(255, 255, 255)):
+    """Render text to a surface at position (x, y)."""
     font = pygame.font.Font(None, size)
     text_surface = font.render(text, True, color)
     surface.blit(text_surface, (x, y))
+
+# Backward-compatible Vietnamese alias
+def ve_text(surface, text, size, x, y, color=(255,255,255)):
+    return draw_text(surface, text, size, x, y, color)
