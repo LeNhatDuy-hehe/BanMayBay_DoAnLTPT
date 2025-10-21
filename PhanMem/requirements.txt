@@ -1,2 +1,2 @@
-Thư viện cần cài đặt
-pygame
+# Thư viện cần thiết cho game Plane Shooter
+pygame>=2.0.0

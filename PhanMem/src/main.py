@@ -10,6 +10,7 @@ from enemy import Enemy
 from hud import Hud
 from item import Item, drop_item
 from boss import Boss
+from explosion import create_explosion, create_boss_explosion
 
 pygame.init()
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -511,6 +512,7 @@ def start_game():
     items = pygame.sprite.Group()
     boss_bullets = pygame.sprite.Group()
     boss_group = pygame.sprite.Group()
+    explosions = pygame.sprite.Group()  # Nhóm hiệu ứng nổ
 
     player = Player(SCREEN_WIDTH // 2, SCREEN_HEIGHT - 80, 5, player_bullets)
     all_sprites.add(player)
@@ -649,14 +651,14 @@ def start_game():
                         if game_over_screen(hud.score):
                             return start_game()
                         else:
-                            return
-            
+                            return            
             continue
 
         all_sprites.update()
         player_bullets.update()
         items.update()
         boss_bullets.update()
+        explosions.update()  # Cập nhật hiệu ứng nổ
         if boss:
             boss.update()
 
@@ -767,8 +769,7 @@ def start_game():
                     if hud.score > 500:
                         base_speed += 1
                     if hud.score > 1000:
-                        base_speed += 1
-                    # Cap tốc độ tối đa
+                        base_speed += 1                    # Cap tốc độ tối đa
                     base_speed = min(base_speed, 8)
                     
                     elapsed = (pygame.time.get_ticks() - start_time) // 10000
@@ -782,7 +783,10 @@ def start_game():
         hits = pygame.sprite.groupcollide(player_bullets, enemies, True, False)
         for bullet, enemies_in in hits.items():
             for enemy in enemies_in:
-                if enemy.take_damage(1):
+                if enemy.take_damage(1):                    # Tạo hiệu ứng nổ khi enemy chết
+                    explosion = create_explosion(enemy.rect.centerx, enemy.rect.centery, "normal")
+                    explosions.add(explosion)
+                    
                     enemy.kill()
                     hud.add_score(10)
                     item = drop_item(enemy.rect.centerx, enemy.rect.centery, SCREEN_HEIGHT)
@@ -792,6 +796,10 @@ def start_game():
 
         hits = pygame.sprite.spritecollide(player, enemies, True)
         for hit in hits:
+            # Tạo hiệu ứng nổ khi player va chạm với enemy
+            explosion = create_explosion(hit.rect.centerx, hit.rect.centery, "large")
+            explosions.add(explosion)
+            
             player.lives -= 1
             if player.gun_level > 1:
                 player.gun_level -= 1
@@ -810,9 +818,7 @@ def start_game():
                     player.gun_level += 1
                 elif player.gun_level == 4:
                     player.gun_level = 5
-                    pygame.time.set_timer(pygame.USEREVENT + 1, 2000)
-
-        # ======= Boss =======
+                    pygame.time.set_timer(pygame.USEREVENT + 1, 2000)        # ======= Boss =======
         if boss:
             boss_hits = pygame.sprite.spritecollide(boss, player_bullets, True)
             for _ in boss_hits:
@@ -823,6 +829,11 @@ def start_game():
                     _lvl = boss.level
                 except Exception:
                     _lvl = None
+
+                # Tạo hiệu ứng nổ đặc biệt cho boss
+                boss_explosions = create_boss_explosion(boss.rect.centerx, boss.rect.centery)
+                for explosion in boss_explosions:
+                    explosions.add(explosion)
 
                 hud.add_score(500 * boss_stage)
                 boss.stop_boss_music()  # Dừng nhạc boss khi boss chết
@@ -850,9 +861,7 @@ def start_game():
                 boss_stage += 1
                 # Giới hạn boss_stage không vượt quá 2
                 if boss_stage > 2:
-                    boss_stage = 2
-
-                # If this was boss level 2, show happy ending screen
+                    boss_stage = 2                # If this was boss level 2, prepare for happy ending but wait for explosions
                 if _lvl == 2:
                     try:
                         # remove any remaining boss bullets
@@ -864,7 +873,51 @@ def start_game():
                     
                     print("🎉 HAPPY ENDING! Bạn đã tiêu diệt tất cả boss! 🎉")
                     
-                    # Hiển thị màn hình Happy Ending
+                    # Delay để hiệu ứng nổ có thời gian diễn ra
+                    explosion_delay_start = pygame.time.get_ticks()
+                    explosion_delay_duration = 3000  # 3 giây để xem hiệu ứng nổ
+                    
+                    # Vòng lặp chờ hiệu ứng nổ
+                    while pygame.time.get_ticks() - explosion_delay_start < explosion_delay_duration:
+                        dt = clock.tick(FPS)
+                        
+                        # Cập nhật và vẽ game bình thường nhưng không sinh địch mới
+                        all_sprites.update()
+                        explosions.update()
+                        
+                        # Vẽ game
+                        screen.blit(bg_current, (0, bg_y))
+                        screen.blit(bg_current, (0, bg_y - SCREEN_HEIGHT))
+                        bg_y += bg_speed
+                        if bg_y >= SCREEN_HEIGHT:
+                            bg_y = 0
+                            
+                        all_sprites.draw(screen)
+                        player_bullets.draw(screen)
+                        items.draw(screen)
+                        explosions.draw(screen)  # Vẽ hiệu ứng nổ
+                        player.draw_effect(screen)
+                        hud.draw(screen)
+                        
+                        # Text thông báo kết thúc game
+                        end_font = pygame.font.SysFont("Arial", 48, bold=True)
+                        end_text = end_font.render("FINAL BOSS DEFEATED!", True, (255, 215, 0))
+                        end_rect = end_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 50))
+                        
+                        # Tạo hiệu ứng nhấp nháy
+                        elapsed_time = pygame.time.get_ticks() - explosion_delay_start
+                        if (elapsed_time // 300) % 2 == 0:  # Nhấp nháy mỗi 300ms
+                            screen.blit(end_text, end_rect)
+                        
+                        pygame.display.flip()
+                        
+                        # Xử lý sự kiện để có thể thoát nếu cần
+                        for event in pygame.event.get():
+                            if event.type == pygame.QUIT:
+                                pygame.quit()
+                                sys.exit()
+                    
+                    # Hiển thị màn hình Happy Ending sau khi hiệu ứng nổ kết thúc
                     try:
                         happy_ending_screen(hud.score)
                     except Exception as e:
@@ -886,13 +939,12 @@ def start_game():
                 if game_over_screen(hud.score):
                     return start_game()
                 else:
-                    running = False
-
-        # ======= Vẽ =======
+                    running = False        # ======= Vẽ =======
         all_sprites.draw(screen)
         player_bullets.draw(screen)
         boss_bullets.draw(screen)
         items.draw(screen)
+        explosions.draw(screen)  # Vẽ hiệu ứng nổ
         if boss:
             boss.draw(screen)
         player.draw_effect(screen)
