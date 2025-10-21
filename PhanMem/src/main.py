@@ -190,11 +190,9 @@ def highscores_screen():
     font = pygame.font.SysFont("Arial", 36)
     title = font.render("HIGHSCORES", True, (255, 215, 0))
     back_text = font.render("BACK", True, (255, 255, 255))
-    clear_text = font.render("CLEAR", True, (255, 100, 100))
 
     title_rect = title.get_rect(center=(rong // 2, 80))
-    back_rect = back_text.get_rect(center=(rong // 2 - 100, cao - 60))
-    clear_rect = clear_text.get_rect(center=(rong // 2 + 100, cao - 60))
+    back_rect = back_text.get_rect(center=(rong // 2 , cao - 60))
 
     hs_font = pygame.font.SysFont("Arial", 28)
 
@@ -209,7 +207,6 @@ def highscores_screen():
             man_hinh.blit(txt, rect)
 
         man_hinh.blit(back_text, back_rect)
-        man_hinh.blit(clear_text, clear_rect)
         pygame.display.flip()
 
         for event in pygame.event.get():
@@ -219,8 +216,6 @@ def highscores_screen():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if back_rect.collidepoint(event.pos):
                     return
-                if clear_rect.collidepoint(event.pos):
-                    clear_highscores()
 
 
 # ==================== MÀN HÌNH GAME OVER ====================

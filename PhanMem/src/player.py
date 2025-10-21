@@ -17,22 +17,22 @@ class Player(pygame.sprite.Sprite):
         self.cooldown = 250  # ms
         self.last_shot = pygame.time.get_ticks()
 
-        # 🌟 Hiệu ứng súng siêu cấp
+        # Hiệu ứng súng siêu cấp
         self.aura_angle = 0
         self.aura_radius = 45
         self.aura_color = (255, 215, 0)
         self.aura_alpha = 100
 
-        # 🔊 Load âm thanh bắn súng
+        # Load âm thanh bắn súng
         try:
             shot_sound_path = os.path.join(os.path.dirname(__file__), "..", "assets", "sound", "Shot", "Laser Shot.wav")
             self.shot_sound = pygame.mixer.Sound(shot_sound_path)
-            self.shot_sound.set_volume(0.3)  # Điều chỉnh âm lượng để không quá to
+            self.shot_sound.set_volume(1.0)  # Điều chỉnh âm lượng để không quá to
             print("✅ Đã load âm thanh bắn súng thành công!")
         except Exception as e:
             self.shot_sound = None
             print(f"⚠️ Không thể load âm thanh bắn súng: {e}")
-
+ 
     def update(self):
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LEFT] and self.rect.left > 0:
