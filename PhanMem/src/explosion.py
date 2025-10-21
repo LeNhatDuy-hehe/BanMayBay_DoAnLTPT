@@ -14,15 +14,15 @@ class Explosion(pygame.sprite.Sprite):
         
         # Kích thước theo loại nổ (giảm kích thước)
         self.sizes = {
-            "small": 20,      # giảm từ 30
-            "normal": 35,     # giảm từ 50 
-            "large": 55,      # giảm từ 80
-            "boss": 120       # giữ nguyên cho boss
+            "small": 10,      
+            "normal": 20,      
+            "large": 30,      
+            "boss": 120       
         }
         
         self.max_radius = self.sizes.get(size, 35)
-        self.radius = 3   # giảm từ 5
-        self.expansion_speed = 2   # giảm từ 3
+        self.radius = 3   
+        self.expansion_speed = 2   
         
         # Màu sắc theo loại nổ
         if color:
@@ -63,23 +63,23 @@ class Explosion(pygame.sprite.Sprite):
         
         # Tạo particles cho hiệu ứng đẹp hơn (giảm số lượng)
         particle_count = {
-            "small": 4,       # giảm từ 8
-            "normal": 6,      # giảm từ 12
-            "large": 8,       # giảm từ 16 
-            "boss": 24        # giữ nguyên cho boss
+            "small": 4,     
+            "normal": 6,     
+            "large": 8,       
+            "boss": 24       
         }
         
         for _ in range(particle_count.get(size, 6)):
             angle = random.uniform(0, 2 * math.pi)
-            speed = random.uniform(0.5, 2.5)  # giảm từ 1-4
+            speed = random.uniform(0.5, 2.5) 
             self.particles.append({
                 'x': 0,
                 'y': 0,
                 'dx': math.cos(angle) * speed,
                 'dy': math.sin(angle) * speed,
-                'size': random.randint(1, 3),  # giảm từ 2-6
+                'size': random.randint(1, 3),  
                 'color': random.choice(self.colors),
-                'life': 180  # giảm từ 255
+                'life': 180 
             })
         
         # Âm thanh nổ (nếu có)
