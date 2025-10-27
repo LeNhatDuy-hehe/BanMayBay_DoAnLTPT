@@ -14,10 +14,10 @@ class Explosion(pygame.sprite.Sprite):
         
         # Kích thước theo loại nổ (giảm kích thước)
         self.sizes = {
-            "small": 10,      
-            "normal": 20,      
-            "large": 30,      
-            "boss": 120       
+            "small": 10,      # nhỏ cho va chạm nhẹ
+            "normal": 20,      # trung bình cho enemy
+            "large": 30,      # lớn cho player
+            "boss": 120       # rất lớn cho boss
         }
         
         self.max_radius = self.sizes.get(size, 35)
