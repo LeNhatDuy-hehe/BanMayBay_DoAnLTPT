@@ -1,7 +1,7 @@
 import pygame
 import random
 from utils import load_image
-from settings import ENEMY_SIZE, SCREEN_HEIGHT as cao, SCREEN_WIDTH as rong  # compatibility import
+from settings import ENEMY_SIZE, SCREEN_HEIGHT, SCREEN_WIDTH  # compatibility import
 
 class Enemy(pygame.sprite.Sprite):
     def __init__(self, x, y, speed, level=1):
@@ -33,9 +33,9 @@ class Enemy(pygame.sprite.Sprite):
         self.rect.y += self.speed
 
         # Nếu bay khỏi màn hình thì xuất hiện lại ngẫu nhiên ở trên
-        if self.rect.top > cao:
+        if self.rect.top > SCREEN_HEIGHT:
             self.rect.y = -random.randint(40, 120)
-            self.rect.x = random.randint(20, rong - 20)
+            self.rect.x = random.randint(20, SCREEN_WIDTH - 20)
 
     def take_damage(self, damage=1):
         """Reduce HP when hit — return True if enemy is dead"""
