@@ -528,6 +528,13 @@ def start_game():
         warning_sound = None
         print("⚠️ Không thể load âm thanh báo động")
 
+    # ======= Biến quản lý spawn enemy =======
+    """
+    Hệ thống spawn enemy với 3 biến chính:
+    - spawn_timer: Đếm thời gian từ lần spawn trước (ms)
+    - spawn_delay: Delay giữa các lần spawn (1000ms → 700ms → 500ms theo điểm)
+    - max_enemies: Giới hạn số lượng enemy tối đa (30)
+    """
     spawn_timer = 0
     spawn_delay = 1000
     max_enemies = 30
@@ -537,7 +544,7 @@ def start_game():
 
     boss_stage = 1
     boss = None
-    boss_dang_ra = False
+    boss_active = False
     # track which boss stages have already been spawned to avoid repeats
     used_boss_stages = set()
 
@@ -677,7 +684,7 @@ def start_game():
                 bg_current = bg_1000
             else:
                 bg_current = bg_boss
-        elif score_now >= 1000 or boss_warning_active or boss_dang_ra:
+        elif score_now >= 1000 or boss_warning_active or boss_active:
             if 'bg_1000' in globals() and bg_1000 is not None:
                 bg_current = bg_1000
             else:
@@ -702,7 +709,7 @@ def start_game():
         current_time = pygame.time.get_ticks()
         
         # Kiểm tra điều kiện kích hoạt báo động boss
-        if (boss_stage in boss_trigger_scores and not boss_dang_ra and 
+        if (boss_stage in boss_trigger_scores and not boss_active and 
             not boss_warning_active and hud.score >= boss_trigger_scores[boss_stage]
             and boss_stage not in used_boss_stages):
             # Bắt đầu báo động
@@ -723,13 +730,14 @@ def start_game():
                 warning_sound.play()
             
             if warning_elapsed >= boss_warning_duration:
-                # Hết thời gian báo động, spawn boss
+                # ======= Xóa tất cả enemy khi boss xuất hiện =======
+                """Xóa toàn bộ enemy để màn hình tập trung vào trận boss"""
                 for enemy in enemies:
                     enemy.kill()
                 boss = Boss(SCREEN_WIDTH // 2, 120, 2, bullet_group=boss_bullets, level=boss_warning_stage)
                 all_sprites.add(boss)
                 boss_group.add(boss)
-                boss_dang_ra = True
+                boss_active = True
                 boss_warning_active = False
                 # mark this stage as used so it won't be spawned again
                 try:
@@ -738,8 +746,16 @@ def start_game():
                     pass
                 print(f"🔥 BOSS {boss_warning_stage} APPEARS!!! 🔥")
 
-        # ======= Sinh địch =======
-        if not boss_dang_ra:
+        # ======= Sinh địch (Enemy Spawning System) =======
+        if not boss_active:
+            """
+            Hệ thống spawn enemy động:
+            - Điều chỉnh spawn_delay theo điểm: 1000ms → 700ms (500pts) → 500ms (1000pts)
+            - Spawn 2-4 enemy mỗi lần, tối đa 30 enemy trên màn hình
+            - Tốc độ enemy tăng theo điểm: base 2-4, +1 tại 500pts, +1 tại 1000pts, cap 8
+            - Level enemy tăng theo thời gian: mỗi 10 giây +1 level, tối đa level 2
+            - Tránh spawn quá gần player (khoảng cách < 60px)
+            """
             current_delay = spawn_delay
             if hud.score > 500:
                 current_delay = 700
@@ -748,18 +764,14 @@ def start_game():
 
             if spawn_timer >= current_delay and len(enemies) < max_enemies:
                 spawn_timer = 0
-                
-                # Tính số địch cần spawn (không vượt max_dich)
                 to_spawn = random.randint(2, 4)
                 to_spawn = min(to_spawn, max_enemies - len(enemies))
                 
-                # Điều chỉnh bg_speed một lần (không trong vòng lặp)
                 if hud.score > 1000:
-                    bg_speed = min(bg_speed + 0.1, 5.0)  # cap tối đa 5.0
+                    bg_speed = min(bg_speed + 0.1, 5.0)
                 
                 for _ in range(to_spawn):
                     x = random.randint(20, SCREEN_WIDTH - 20)
-                    # Tránh spawn quá gần player
                     if abs(x - player.rect.centerx) < 60:
                         offset = random.choice([-100, 100])
                         x = max(20, min(SCREEN_WIDTH - 20, player.rect.centerx + offset))
@@ -769,25 +781,30 @@ def start_game():
                     if hud.score > 500:
                         base_speed += 1
                     if hud.score > 1000:
-                        base_speed += 1                    # Cap tốc độ tối đa
+                        base_speed += 1
                     base_speed = min(base_speed, 8)
                     
                     elapsed = (pygame.time.get_ticks() - start_time) // 10000
                     enemy_level = min(1 + elapsed, 2)
                     random_level = random.randint(1, enemy_level)
+                    
                     new_enemy = Enemy(x, y, base_speed, level=random_level)
                     all_sprites.add(new_enemy)
                     enemies.add(new_enemy)
 
-        # ======= Va chạm =======
+        # ======= Va chạm đạn player - enemy =======
+        """
+        Xử lý va chạm giữa đạn player và enemy:
+        - Sử dụng groupcollide(dokill1=True, dokill2=False)
+        - Xóa đạn ngay, giữ enemy để kiểm tra HP
+        - Nếu enemy chết: tạo explosion, cộng 10 điểm, 15% rơi item
+        """
         hits = pygame.sprite.groupcollide(player_bullets, enemies, True, False)
         for bullet, enemies_in in hits.items():
-            """Xử lý khi đạn bắn trúng địch"""
             for enemy in enemies_in:
-                if enemy.take_damage(1):                    # Tạo hiệu ứng nổ khi enemy chết
+                if enemy.take_damage(1):
                     explosion = create_explosion(enemy.rect.centerx, enemy.rect.centery, "normal")
                     explosions.add(explosion)
-                    
                     enemy.kill()
                     hud.add_score(10)
                     item = drop_item(enemy.rect.centerx, enemy.rect.centery, SCREEN_HEIGHT)
@@ -795,12 +812,17 @@ def start_game():
                         all_sprites.add(item)
                         items.add(item)
 
+        # ======= Va chạm player - enemy =======
+        """
+        Xử lý va chạm trực tiếp giữa player và enemy:
+        - Sử dụng spritecollide(dokill=True): xóa enemy ngay khi chạm
+        - Tạo explosion lớn, player mất 1 mạng và giảm 1 gun_level
+        - Nếu hết mạng → Game Over
+        """
         hits = pygame.sprite.spritecollide(player, enemies, True)
         for hit in hits:
-            """Xử lý khi địch va chạm với player"""
             explosion = create_explosion(hit.rect.centerx, hit.rect.centery, "large")
             explosions.add(explosion)
-            
             player.lives -= 1
             if player.gun_level > 1:
                 player.gun_level -= 1
@@ -841,7 +863,7 @@ def start_game():
                 hud.add_score(500 * boss_stage)
                 boss.stop_boss_music()  # Dừng nhạc boss khi boss chết
                 boss.kill()
-                boss_dang_ra = False
+                boss_active = False
                 boss = None
                 print(f"💥 BOSS {boss_stage} DEFEATED! 🔥")
 

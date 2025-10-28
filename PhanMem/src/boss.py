@@ -222,9 +222,6 @@ class Boss(pygame.sprite.Sprite):
             bullet = BossBullet(self.rect.centerx, self.rect.centery, angle, speed=4, color=(0, 255, 0))
             self.bullet_group.add(bullet)
 
-    def tru_mau(self, damage):
-        return self.take_damage(damage)
-
     def take_damage(self, damage):
         self.hp -= damage
         if self.hp <= 0:
