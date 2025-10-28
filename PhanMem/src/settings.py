@@ -12,9 +12,4 @@ WHITE = (255, 255, 255)
 RED = (255, 0, 0)
 BLACK = (0, 0, 0)
 
-# --- Backward compatibility aliases (Vietnamese) ---
-rong = SCREEN_WIDTH   # chiều rộng màn hình
-cao = SCREEN_HEIGHT   # chiều cao màn hình
-TRANG = WHITE
-DO = RED
-DEN = BLACK
+

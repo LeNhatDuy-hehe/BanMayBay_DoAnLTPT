@@ -17,7 +17,7 @@ screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("PLANE SHOOTER")
 clock = pygame.time.Clock()
 
-# ======== ĐƯỜNG DẪN ẢNH ========
+#ĐƯỜNG DẪN ẢNH 
 assets_path = os.path.join(os.path.dirname(__file__), "..", "assets", "image", "scrollbackground")
 # Default background (required)
 bg_default_path = os.path.join(assets_path, "scroll_background.png")
@@ -133,7 +133,7 @@ if bg_endgame is None:
     
     print("Custom endgame background created successfully")
 
-# ==================== MÀN HÌNH MENU ====================
+#MÀN HÌNH MENU 
 def main_menu():
     menu_music = os.path.join(os.path.dirname(__file__), "..", "assets", "sound", "endgame", "Endgame.wav")
     try:
@@ -219,7 +219,7 @@ def highscores_screen():
                     return
 
 
-# ==================== MÀN HÌNH GAME OVER ====================
+#MÀN HÌNH GAME OVER
 def game_over_screen(score):
     gameover_music = os.path.join(os.path.dirname(__file__), "..", "assets", "sound", "endgame", "Endgame.wav")
     try:
@@ -351,7 +351,7 @@ def game_over_screen(score):
                         if char.isprintable():
                             input_name += char
 
-# ==================== MÀN HÌNH KẾT THÚC GAME (HAPPY ENDING) ====================
+# MÀN HÌNH KẾT THÚC GAME (HAPPY ENDING)
 def happy_ending_screen(score):
     """Hiển thị màn hình kết thúc với ảnh endgame và dòng chữ Happy Ending"""
     global bg_endgame
@@ -449,7 +449,7 @@ def happy_ending_screen(score):
         
         pygame.display.flip()
 
-# ==================== HÀM HIỂN THỊ THÔNG BÁO BOSS ====================
+# HÀM HIỂN THỊ THÔNG BÁO BOSS 
 def draw_boss_warning(screen, boss_stage, warning_time):
     """Hiển thị thông báo báo động boss"""
     # Tạo hiệu ứng nhấp nháy
@@ -500,7 +500,7 @@ def draw_boss_warning(screen, boss_stage, warning_time):
     
     screen.blit(warning_surface, (0, 0))
 
-# ==================== HÀM KHỞI TẠO GAME ====================
+# HÀM KHỞI TẠO GAME 
 def start_game():
     music_path = os.path.join(os.path.dirname(__file__), "..", "assets", "sound", "BackgroundMusic", "awestruck.wav")
     pygame.mixer.music.load(music_path)

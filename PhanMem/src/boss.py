@@ -88,11 +88,11 @@ class Boss(pygame.sprite.Sprite):
                 pygame.mixer.music.load(boss_music_path)
                 pygame.mixer.music.set_volume(0.7)  # Điều chỉnh âm lượng
                 pygame.mixer.music.play(-1)  # Loop vô hạn
-                print(f"🎵 Đang phát nhạc boss level {level}!")
+                print(f" Đang phát nhạc boss level {level}!")
             except pygame.error as e:
-                print(f"⚠️ Không thể phát nhạc boss: {e}")
+                print(f" Không thể phát nhạc boss: {e}")
         else:
-            print(f"⚠️ Không tìm thấy file nhạc boss: {boss_music_path}")
+            print(f" Không tìm thấy file nhạc boss: {boss_music_path}")
 
     def update(self):
         """Cập nhật trạng thái boss mỗi khung hình:
@@ -257,4 +257,4 @@ class Boss(pygame.sprite.Sprite):
             pygame.mixer.music.stop()
             print("🎵 Đã dừng nhạc boss!")
         except pygame.error as e:
-            print(f"⚠️ Lỗi khi dừng nhạc boss: {e}")
+            print(f" Lỗi khi dừng nhạc boss: {e}")

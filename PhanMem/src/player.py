@@ -65,7 +65,7 @@ class Player(pygame.sprite.Sprite):
         if now - self.last_shot > self.cooldown:
             self.last_shot = now
 
-            # 🔊 Phát âm thanh bắn súng
+            # Phát âm thanh bắn súng
             if self.shot_sound:
                 self.shot_sound.play()
 
@@ -95,16 +95,12 @@ class Player(pygame.sprite.Sprite):
 
 
             elif self.gun_level == 5:
-                # Đạn xoắn ốc (cực đẹp)
+                # Đạn xoắn ốc
                 for angle in range(0, 360, 60):
                     rad = math.radians(angle + self.aura_angle)
                     dx = math.cos(rad) * 6
                     dy = math.sin(rad) * 6 - 10  # bay lên
                     self.bullet_group.add(SpiralBullet(x, y, dx, dy))
-
-    # Vietnamese alias for existing code
-    def ve_hieu_ung(self, man_hinh):
-        return self.draw_effect(man_hinh)
 
     def draw_effect(self, surface):
         """✨ Hiệu ứng ánh sáng quanh máy bay ở cấp 5"""
