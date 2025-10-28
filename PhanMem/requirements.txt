@@ -1,2 +1,11 @@
-# Thư viện cần thiết cho game Plane Shooter
-pygame>=2.0.0
+# ===== YÊU CẦU CÀI ĐẶT =====
+# Game Bắn Máy Bay 2D - Plane Shooter
+# Python version: 3.7+
+
+# Thư viện game engine
+pygame>=2.5.0
+
+# Thư viện hỗ trợ (tùy chọn)
+# Nếu muốn mở rộng thêm tính năng
+# numpy>=1.21.0        # Xử lý tính toán nâng cao
+# pillow>=9.0.0        # Xử lý ảnh bổ sung
