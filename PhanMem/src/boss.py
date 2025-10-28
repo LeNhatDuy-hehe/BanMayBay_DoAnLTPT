@@ -95,6 +95,14 @@ class Boss(pygame.sprite.Sprite):
             print(f"⚠️ Không tìm thấy file nhạc boss: {boss_music_path}")
 
     def update(self):
+        """Cập nhật trạng thái boss mỗi khung hình:
+           Hiệu ứng xuất hiện dần (alpha tăng).
+           Di chuyển ngang và đổi hướng khi chạm biên.
+           Tấn công theo cấp độ và lượng HP:
+           Đạn tỏa tròn hoặc xoáy (tùy level).
+           Bắn laser khi HP ≤ 50%.
+           Phóng sóng năng lượng khi HP ≤ 75%.
+           Bắn 3 nòng khi HP ≤ 25%."""
         if self.appearing:
             self.alpha += 8
             if self.alpha >= 255:

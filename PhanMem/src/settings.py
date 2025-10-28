@@ -1,16 +1,3 @@
-"""
-Game settings. Migrated to English names with backward-compatible Vietnamese aliases.
-
-English exports (preferred):
-- SCREEN_WIDTH, SCREEN_HEIGHT, FPS
-- PLAYER_SIZE, ENEMY_SIZE
-- WHITE, RED, BLACK
-
-Vietnamese aliases are kept for existing code:
-- rong -> SCREEN_WIDTH, cao -> SCREEN_HEIGHT
-- TRANG -> WHITE, DO -> RED, DEN -> BLACK
-"""
-
 # Screen
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600

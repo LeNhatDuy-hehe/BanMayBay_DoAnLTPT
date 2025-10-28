@@ -34,6 +34,10 @@ class Player(pygame.sprite.Sprite):
             # silent fallback
  
     def update(self):
+        """Cập nhật trạng thái người chơi mỗi khung hình:
+      - Di chuyển theo phím mũi tên trong giới hạn màn hình.
+      - Bắn đạn khi nhấn phím cách (SPACE).
+      - Xoay hiệu ứng quanh người chơi nếu đạt cấp súng 5."""
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LEFT] and self.rect.left > 0:
             self.rect.x -= self.speed

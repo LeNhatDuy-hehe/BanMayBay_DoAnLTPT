@@ -712,7 +712,7 @@ def start_game():
             # Phát âm thanh báo động
             if warning_sound:
                 warning_sound.play()
-            print(f"🚨 CẢNH BÁO: BOSS {boss_stage} SẮP XUẤT HIỆN! 🚨")
+            print(f"🚨 WARNING: BOSS {boss_stage} ABOUT TO APPEAR! 🚨")
         
         # Xử lý báo động đang diễn ra
         if boss_warning_active:
@@ -736,7 +736,7 @@ def start_game():
                     used_boss_stages.add(boss_warning_stage)
                 except Exception:
                     pass
-                print(f"🔥 BOSS {boss_warning_stage} XUẤT HIỆN!!! 🔥")
+                print(f"🔥 BOSS {boss_warning_stage} APPEARS!!! 🔥")
 
         # ======= Sinh địch =======
         if not boss_dang_ra:
@@ -782,6 +782,7 @@ def start_game():
         # ======= Va chạm =======
         hits = pygame.sprite.groupcollide(player_bullets, enemies, True, False)
         for bullet, enemies_in in hits.items():
+            """Xử lý khi đạn bắn trúng địch"""
             for enemy in enemies_in:
                 if enemy.take_damage(1):                    # Tạo hiệu ứng nổ khi enemy chết
                     explosion = create_explosion(enemy.rect.centerx, enemy.rect.centery, "normal")
@@ -796,7 +797,7 @@ def start_game():
 
         hits = pygame.sprite.spritecollide(player, enemies, True)
         for hit in hits:
-            # Tạo hiệu ứng nổ khi player va chạm với enemy
+            """Xử lý khi địch va chạm với player"""
             explosion = create_explosion(hit.rect.centerx, hit.rect.centery, "large")
             explosions.add(explosion)
             
@@ -811,6 +812,7 @@ def start_game():
 
         collected = pygame.sprite.spritecollide(player, items, True)
         for item in collected:
+            """Xử lý khi player thu thập item"""
             if item.type == "hp":
                 player.lives = min(3, player.lives + 1)
             elif item.type == "power":
@@ -822,6 +824,7 @@ def start_game():
         if boss:
             boss_hits = pygame.sprite.spritecollide(boss, player_bullets, True)
             for _ in boss_hits:
+                """Xử lý khi đạn bắn trúng boss"""
                 boss.take_damage(5)
             if boss.hp <= 0:
                 # capture the level before destroying the boss
@@ -840,7 +843,7 @@ def start_game():
                 boss.kill()
                 boss_dang_ra = False
                 boss = None
-                print(f"💥 BOSS {boss_stage} BỊ TIÊU DIỆT! 🔥")
+                print(f"💥 BOSS {boss_stage} DEFEATED! 🔥")
 
                 # Khôi phục nhạc nền sau khi boss chết
                 try:
@@ -871,7 +874,7 @@ def start_game():
                     except Exception:
                         pass
                     
-                    print("🎉 HAPPY ENDING! Bạn đã tiêu diệt tất cả boss! 🎉")
+                    print("🎉 HAPPY ENDING! You have defeated all the bosses! 🎉")
                     
                     # Delay để hiệu ứng nổ có thời gian diễn ra
                     explosion_delay_start = pygame.time.get_ticks()
@@ -934,6 +937,7 @@ def start_game():
 
         boss_bullet_hits = pygame.sprite.spritecollide(player, boss_bullets, True)
         if boss_bullet_hits:
+            """Xử lý khi đạn boss va chạm với player"""
             player.lives -= 1
             if player.lives <= 0:
                 if game_over_screen(hud.score):
