@@ -705,7 +705,7 @@ def start_game():
             bg_y = 0
 
         # ======= Hệ thống báo động và sinh Boss =======
-        boss_trigger_scores = {1:500, 2: 4000}
+        boss_trigger_scores = {1: 1000, 2: 4000}
         current_time = pygame.time.get_ticks()
         
         # Kiểm tra điều kiện kích hoạt báo động boss
