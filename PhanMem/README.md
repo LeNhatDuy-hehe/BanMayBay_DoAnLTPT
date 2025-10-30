@@ -16,8 +16,8 @@ Trò chơi bắn máy bay 2D được xây dựng bằng Python và thư viện 
 | MSSV | Họ Tên | Vai trò |
 |------|--------|---------|
 | 223160 | Lê Nhật Duy | Trưởng nhóm - Game Loop, Utils |
-| 225234 | Bùi Nhật Anh | UI/UX, HUD, Menu |
-| 221355 | Hà Quốc Khởi | Player, Bullet, Item, Explosion |
+| 225234 | Bùi Nhật Anh | Player, Bullet, Item, Explosion |
+| 221355 | Hà Quốc Khởi | UI/UX, HUD, Menu |
 | 221964 | Nguyễn Minh Khôi | Boss System |
 | 223521 | Phạm Huỳnh Như | Enemy, Báo cáo |
 
